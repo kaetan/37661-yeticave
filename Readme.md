@@ -1,7 +1,7 @@
 # Личный проект «YetiCave»
 
 * Студент: [Кирилл Прокудин](https://up.htmlacademy.ru/php/6/user/37661).
-* Наставник: `Неизвестно`.
+* Наставник: [Денис Байдаров](https://up.htmlacademy.ru/php/6/user/7956).
 
 ---
 
