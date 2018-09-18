@@ -57,9 +57,12 @@ $user_avatar = 'img/user.jpg';
         <p class="promo__text">На нашем интернет-аукционе ты найдёшь самое эксклюзивное сноубордическое и горнолыжное снаряжение.</p>
         <ul class="promo__list">
             <!--заполните этот список из массива категорий-->
+            <?php $categories = ["Доски и лыжи", "Крепления", "Ботинки", "Одежда", "Инструменты", "Разное"]; ?>
+            <?php foreach ($categories as $val): ?>
             <li class="promo__item promo__item--boards">
-                <a class="promo__link" href="pages/all-lots.html">Имя категории</a>
+                <a class="promo__link" href="pages/all-lots.html"><?=$val; ?></a>
             </li>
+            <? endforeach ?>
         </ul>
     </section>
     <section class="lots">
@@ -68,24 +71,62 @@ $user_avatar = 'img/user.jpg';
         </div>
         <ul class="lots__list">
             <!--заполните этот список из массива с товарами-->
-            <li class="lots__item lot">
-                <div class="lot__image">
-                    <img src="" width="350" height="260" alt="">
-                </div>
-                <div class="lot__info">
-                    <span class="lot__category">Название категории</span>
-                    <h3 class="lot__title"><a class="text-link" href="pages/lot.html">Название товара</a></h3>
-                    <div class="lot__state">
-                        <div class="lot__rate">
-                            <span class="lot__amount">Стартовая цена</span>
-                            <span class="lot__cost">цена<b class="rub">р</b></span>
-                        </div>
-                        <div class="lot__timer timer">
+            <?php $wares = [
+              0 => [
+                "Название" =>"2014 Rossignol District Snowboard",
+                "Категория" =>"Доски и лыжи",
+                "Цена" =>10999,
+                "URL картинки" =>"img/lot-1.jpg"
+              ],
+              1 => [
+                "Название" =>"DC Ply Mens 2016/2017 Snowboard",
+                "Категория" =>"Доски и лыжи",
+                "Цена" =>159999,
+                "URL картинки" =>"img/lot-2.jpg" 
+              ],
+              2 => [
+                "Название" =>"Крепления Union Contact Pro 2015 года размер L/XL",
+                "Категория" =>"Крепления",
+                "Цена" =>8000,
+                "URL картинки" =>"img/lot-3.jpg"
+              ],
+              3 => [
+                "Название" =>"Ботинки для сноуборда DC Mutiny Charocal",
+                "Категория" =>"Ботинки",
+                "Цена" =>10999,
+                "URL картинки" =>"img/lot-4.jpg"
+              ],
+              4 => [
+                "Название" =>"Куртка для сноуборда DC Mutiny Charocal",
+                "Категория" =>"Одежда",
+                "Цена" =>7500,
+                "URL картинки" =>"img/lot-5.jpg"
+              ],
+              5 => [
+                "Название" =>"Маска Oakley Canopy",
+                "Категория" =>"Разное",
+                "Цена" =>5400,
+                "URL картинки" =>"img/lot-6.jpg"
+              ],
+            ]; ?>
+            <?php foreach ($wares as $key => $val): ?>
+              <li class="lots__item lot">
+                  <div class="lot__image">
+                      <img src="<?=$val['URL картинки']; ?>" width="350" height="260" alt="<?=$val['Название']; ?>">
+                  </div>
+                  <div class="lot__info">
+                      <span class="lot__category"><?=$val['Категория']; ?></span>
+                      <h3 class="lot__title"><a class="text-link" href="pages/lot.html"><?=$val['Название']; ?></a></h3>
+                      <div class="lot__state">
+                          <div class="lot__rate">
+                          </div>
+                          <div class="lot__timer timer">
 
-                        </div>
-                    </div>
-                </div>
-            </li>
+                          </div>
+                      </div>
+                  </div>
+              </li>
+            <? endforeach ?>
         </ul>
     </section>
 </main>
@@ -95,9 +136,11 @@ $user_avatar = 'img/user.jpg';
     <nav class="nav">
         <ul class="nav__list container">
             <!--заполните этот список из массива категорий-->
-            <li class="nav__item">
-                <a href="pages/all-lots.html">Название категории</a>
-            </li>
+            <?php foreach ($categories as $val): ?>
+              <li class="nav__item">
+                  <a href="pages/all-lots.html"><?=$val;?></a>
+              </li>
+            <? endforeach ?>
         </ul>
     </nav>
     <div class="main-footer__bottom container">
