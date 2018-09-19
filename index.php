@@ -5,6 +5,15 @@ $user_name = ''; // укажите здесь ваше имя
 $user_avatar = 'img/user.jpg';
 ?>
 
+<?php
+function format_cost($cost) {
+    $cost = ceil($cost);
+    $cost = number_format($cost, 0, ',', ' ');
+    $cost = $cost . "<b class=\"rub\">р</b>";
+    return($cost);
+}
+?>
+
 <?php $categories = ["Доски и лыжи", "Крепления", "Ботинки", "Одежда", "Инструменты", "Разное"]; ?>
 
 <?php $wares = [
@@ -123,7 +132,9 @@ $user_avatar = 'img/user.jpg';
                       <div class="lot__state">
                           <div class="lot__rate">
                               <span class="lot__amount">Стартовая цена</span>
-                              <span class="lot__cost"><?=$val['cost']; ?><b class="rub">р</b></span>
+                              <span class="lot__cost">
+                                  <?php print(format_cost($val['cost'])); ?>
+                              </span>
                           </div>
                           <div class="lot__timer timer">
 
