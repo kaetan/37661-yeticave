@@ -1,6 +1,8 @@
 <?php
+// Рандомайзер залогинен/не залогинен
+$is_auth = rand(0, 1);
+
 // Подключаем нужные файлы
-require_once 'controllers/controllers.php';
 require_once 'functions.php';
 require_once 'data.php';
 
