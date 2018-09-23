@@ -24,3 +24,15 @@ function format_cost($cost) {
     $cost = $cost . "<b class=\"rub\">р</b>";
     return($cost);
 };
+
+// Функция-таймер для лотов. Считает, сколько часов и минут осталось до полуночи
+function lot_timer() {
+    $seconds = strtotime('tomorrow') - strtotime('now');
+    $hours = floor($seconds / 3600);
+    $minutes = floor(($seconds % 3600) / 60);
+    if ($minutes < 10) {
+        $minutes = '0'.$minutes;
+    };
+    $lot_time = $hours.":".$minutes;
+    return $lot_time;
+};
