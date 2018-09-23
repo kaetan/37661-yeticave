@@ -1,4 +1,7 @@
 <?php
+// Таймзона
+date_default_timezone_set("Europe/Moscow");
+
 // Рандомайзер залогинен/не залогинен
 $is_auth = rand(0, 1);
 
