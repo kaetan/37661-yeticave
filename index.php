@@ -15,7 +15,7 @@ if (!$link) {
     $error = mysqli_connect_error();
     $content = include_template('error.php', ['error' => $error]);
     $layout = include_template('layout.php',
-        ['content' => $content, 'is_auth' => $is_auth, 'categories' =>[], 'title' => 'Главная']);
+        ['content' => $content, 'is_auth' => $is_auth, 'title' => 'Главная']);
     print($layout);
     exit();
 }
