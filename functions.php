@@ -36,3 +36,20 @@ function lot_timer() {
     $lot_time = $hours.":".$minutes;
     return $lot_time;
 };
+
+// Запрос категорий из БД
+function categories() {
+    $sql_categories = "SELECT id, title FROM categories ORDER BY id ASC";
+    return $sql_categories;
+};
+
+// Запрос лотов из БД
+function lots() {
+    $sql_lots = "SELECT l.title, starting_price, current_price, picture, c.title as category, COUNT(b.id) as bets_quantity
+            FROM lots l
+            LEFT JOIN categories c ON c.id = category
+            LEFT JOIN bets b ON l.id = b.lot WHERE datetime_finish > CURRENT_TIMESTAMP
+            GROUP BY l.id
+            ORDER BY datetime_start DESC LIMIT 6";
+    return $sql_lots;
+};

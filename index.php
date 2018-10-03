@@ -21,7 +21,7 @@ if (!$link) {
 }
 
 // Показ категорий из БД
-$sql_categories = "SELECT id, title FROM categories ORDER BY id ASC";
+$sql_categories = categories();
 $result = mysqli_query($link, $sql_categories);
 if ($result) {
     $categories = mysqli_fetch_all($result, MYSQLI_ASSOC);
@@ -31,12 +31,7 @@ if ($result) {
 }
 
 // Показ лотов из БД
-$sql_lots = "SELECT l.title, starting_price, current_price, picture, c.title as category, COUNT(b.id) as bets_quantity
-            FROM lots l
-            LEFT JOIN categories c ON c.id = category
-            LEFT JOIN bets b ON l.id = b.lot WHERE datetime_finish > CURRENT_TIMESTAMP
-            GROUP BY l.id
-            ORDER BY datetime_start DESC LIMIT 6";
+$sql_lots = lots();
 if ($res = mysqli_query($link, $sql_lots)) {
     $lots = mysqli_fetch_all($res, MYSQLI_ASSOC);
     $content = include_template('main.php', ['lots' => $lots, 'categories' => $categories]);
