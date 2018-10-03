@@ -10,36 +10,17 @@ require_once 'functions.php';
 require_once 'data.php';
 require_once 'init.php';
 
-// Вывод ошибки при неудачном подключении к БД
-if (!$link) {
-    $error = mysqli_connect_error();
-    $content = include_template('error.php', ['error' => $error]);
-    $layout = include_template('layout.php',
-        ['content' => $content, 'is_auth' => $is_auth, 'title' => 'Главная']);
-    print($layout);
-    exit();
-}
+// Проверка подключения к БД и вывод ошибки, если она имеется
+db_connection_error($link);
 
-// Показ категорий из БД
-$sql_categories = categories();
-$result = mysqli_query($link, $sql_categories);
-if ($result) {
-    $categories = mysqli_fetch_all($result, MYSQLI_ASSOC);
-} else {
-    $error = mysqli_error($link);
-    $content = include_template('error.php', ['error' => $error]);
-}
+// Запрос категорий из БД
+$categories = categories($link);
 
-// Показ лотов из БД
-$sql_lots = lots();
-if ($res = mysqli_query($link, $sql_lots)) {
-    $lots = mysqli_fetch_all($res, MYSQLI_ASSOC);
-    $content = include_template('main.php', ['lots' => $lots, 'categories' => $categories]);
-} else {
-    $content = include_template('error.php', ['error' => mysqli_error($link)]);
-}
+// Запрос лотов из БД
+$lots = lots($link);
 
 // Собираем страницу и выводим ее на экран
+$content = include_template('main.php', ['lots' => $lots, 'categories' => $categories]);
 $layout = include_template('layout.php',
     ['content' => $content, 'is_auth' => $is_auth, 'categories' => $categories, 'title' => 'Главная']);
 print($layout);

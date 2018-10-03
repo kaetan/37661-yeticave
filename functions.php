@@ -37,19 +37,51 @@ function lot_timer() {
     return $lot_time;
 };
 
+// Вывод ошибки при неудачном подключении к БД
+function db_connection_error($link) {
+    if (!$link) {
+        $error = mysqli_connect_error();
+        $content = include_template('error.php', ['error' => $error]);
+        $layout = include_template('layout.php', ['content' => $content]);
+        print($layout);
+        exit();
+    }
+};
+
+// Вывод ошибки запроса из БД
+function bd_error($link) {
+    $error = mysqli_error($link);
+    $content = include_template('error.php', ['error' => $error]);
+    $layout = include_template('layout.php', ['content' => $content]);
+    return $layout;
+};
+
 // Запрос категорий из БД
-function categories() {
-    $sql_categories = "SELECT id, title FROM categories ORDER BY id ASC";
-    return $sql_categories;
+function categories($link) {
+    $sql_categories = $sql_categories = "SELECT id, title FROM categories ORDER BY id ASC";
+    $result = mysqli_query($link, $sql_categories);
+    if ($result) {
+        $categories = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    } else {
+        print(bd_error($link));
+        exit();
+    }
+    return $categories;
 };
 
 // Запрос лотов из БД
-function lots() {
-    $sql_lots = "SELECT l.title, starting_price, current_price, picture, c.title as category, COUNT(b.id) as bets_quantity
+function lots($link) {
+    $sql_lots = $sql_lots = "SELECT l.title, starting_price, current_price, picture, c.title as category, COUNT(b.id) as bets_quantity
             FROM lots l
             LEFT JOIN categories c ON c.id = category
             LEFT JOIN bets b ON l.id = b.lot WHERE datetime_finish > CURRENT_TIMESTAMP
             GROUP BY l.id
             ORDER BY datetime_start DESC LIMIT 6";
-    return $sql_lots;
+    if ($result = mysqli_query($link, $sql_lots)) {
+        $lots = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    } else {
+        print(bd_error($link));
+        exit();
+    }
+    return $lots;
 };
