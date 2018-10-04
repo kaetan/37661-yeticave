@@ -46,7 +46,7 @@
     </header>
 
     <main class="container">
-        <?=$page_content; ?>
+        <?=$content; ?>
     </main>
 </div>
 
@@ -56,7 +56,7 @@
             <!--заполните этот список из массива категорий-->
             <?php foreach ($categories as $val): ?>
                 <li class="nav__item">
-                    <a href="pages/all-lots.html"><?=$val;?></a>
+                    <a href="pages/all-lots.html"><?=$val['title'];?></a>
                 </li>
             <? endforeach ?>
         </ul>
