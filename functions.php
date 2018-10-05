@@ -24,10 +24,27 @@ function format_cost($cost) {
     $cost = $cost . "<b class=\"rub\">р</b>";
     return($cost);
 };
+// Функция форматирования цены. Добавляет пробел между каждыми тремя знаками
+function format_cost_no_ruble($cost) {
+    $cost = ceil($cost);
+    $cost = number_format($cost, 0, ',', ' ');
+    return($cost);
+};
 
 // Функция-таймер для лотов. Считает, сколько часов и минут осталось до полуночи
 function lot_timer() {
     $seconds = strtotime('tomorrow') - strtotime('now');
+    $hours = floor($seconds / 3600);
+    $minutes = floor(($seconds % 3600) / 60);
+    if ($minutes < 10) {
+        $minutes = '0'.$minutes;
+    };
+    $lot_time = $hours.":".$minutes;
+    return $lot_time;
+};
+// Функция-таймер для лотов. Считает, сколько часов и минут осталось до окончания лота
+function lot_timer2($datetime_finish) {
+    $seconds = strtotime($datetime_finish) - strtotime('now');
     $hours = floor($seconds / 3600);
     $minutes = floor(($seconds % 3600) / 60);
     if ($minutes < 10) {
@@ -49,7 +66,7 @@ function db_connection_error($link) {
 };
 
 // Вывод ошибки запроса из БД
-function bd_error($link) {
+function db_error($link) {
     $error = mysqli_error($link);
     $content = include_template('error.php', ['error' => $error]);
     $layout = include_template('layout.php', ['content' => $content]);
@@ -58,12 +75,12 @@ function bd_error($link) {
 
 // Запрос категорий из БД
 function categories($link) {
-    $sql_categories = $sql_categories = "SELECT id, title FROM categories ORDER BY id ASC";
+    $sql_categories = "SELECT id, title FROM categories ORDER BY id ASC";
     $result = mysqli_query($link, $sql_categories);
     if ($result) {
         $categories = mysqli_fetch_all($result, MYSQLI_ASSOC);
     } else {
-        print(bd_error($link));
+        print(db_error($link));
         exit();
     }
     return $categories;
@@ -71,7 +88,7 @@ function categories($link) {
 
 // Запрос лотов из БД
 function lots($link) {
-    $sql_lots = $sql_lots = "SELECT l.title, starting_price, current_price, picture, c.title as category, COUNT(b.id) as bets_quantity
+    $sql_lots = "SELECT l.id, l.title, starting_price, current_price, picture, c.title as category, COUNT(b.id) as bets_quantity
             FROM lots l
             LEFT JOIN categories c ON c.id = category
             LEFT JOIN bets b ON l.id = b.lot WHERE datetime_finish > CURRENT_TIMESTAMP
@@ -80,8 +97,25 @@ function lots($link) {
     if ($result = mysqli_query($link, $sql_lots)) {
         $lots = mysqli_fetch_all($result, MYSQLI_ASSOC);
     } else {
-        print(bd_error($link));
+        print(db_error($link));
         exit();
     }
     return $lots;
 };
+
+// Запрос лота по id
+function lot_info($link, $lot_id) {
+    $sql_lot = "SELECT l.id, l.title, picture, c.title as category, 
+                      description, datetime_finish, current_price, 
+                      current_price + bet_increment AS min_bet
+            FROM lots l
+            LEFT JOIN categories c ON c.id = category 
+            WHERE l.id = $lot_id";
+    if ($result = mysqli_query($link, $sql_lot)) {
+        $lot_info = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    } else {
+        print(db_error($link));
+        exit();
+    }
+    return $lot_info;
+}
