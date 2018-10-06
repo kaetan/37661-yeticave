@@ -31,19 +31,8 @@ function format_cost_no_ruble($cost) {
     return($cost);
 };
 
-// Функция-таймер для лотов. Считает, сколько часов и минут осталось до полуночи
-function lot_timer() {
-    $seconds = strtotime('tomorrow') - strtotime('now');
-    $hours = floor($seconds / 3600);
-    $minutes = floor(($seconds % 3600) / 60);
-    if ($minutes < 10) {
-        $minutes = '0'.$minutes;
-    };
-    $lot_time = $hours.":".$minutes;
-    return $lot_time;
-};
 // Функция-таймер для лотов. Считает, сколько часов и минут осталось до окончания лота
-function lot_timer2($datetime_finish) {
+function lot_timer($datetime_finish) {
     $seconds = strtotime($datetime_finish) - strtotime('now');
     $hours = floor($seconds / 3600);
     $minutes = floor(($seconds % 3600) / 60);
@@ -88,7 +77,7 @@ function categories($link) {
 
 // Запрос лотов из БД
 function lots($link) {
-    $sql_lots = "SELECT l.id, l.title, starting_price, current_price, picture, c.title as category, COUNT(b.id) as bets_quantity
+    $sql_lots = "SELECT l.id, l.title, starting_price, current_price, picture, datetime_finish, c.title as category, COUNT(b.id) as bets_quantity
             FROM lots l
             LEFT JOIN categories c ON c.id = category
             LEFT JOIN bets b ON l.id = b.lot WHERE datetime_finish > CURRENT_TIMESTAMP

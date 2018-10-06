@@ -22,7 +22,7 @@
             <div class="lot-item__right">
                 <div class="lot-item__state">
                     <div class="lot-item__timer timer">
-                        <?php print lot_timer2($val['datetime_finish'])?>
+                        <?php print lot_timer($val['datetime_finish'])?>
                     </div>
                     <div class="lot-item__cost-state">
                         <div class="lot-item__rate">

@@ -16,7 +16,7 @@
                               </span>
                     </div>
                     <div class="lot__timer timer">
-                        <?php print(lot_timer()); ?>
+                        <?php print lot_timer($lot['datetime_finish'])?>
                     </div>
                 </div>
             </div>
