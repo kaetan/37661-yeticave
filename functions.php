@@ -114,8 +114,7 @@ function lot_info($link, $lot_id) {
     if ($result = mysqli_query($link, $sql_lot)) {
         $lot_info = mysqli_fetch_all($result, MYSQLI_ASSOC);
     } else {
-        print(db_error($link));
-        exit();
+        $lot_info = [];
     }
     return $lot_info;
 }
