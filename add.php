@@ -15,25 +15,43 @@ db_connection_error($link);
 
 // Запрос категорий из БД
 $categories = categories($link);
+// Список id категорий
+$cat_id_list = array_column($categories, 'id');
 
 $content = include_template('lot_add.php', ['categories' => $categories]);
 
 // Валидация данных из формы
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $required = ['title', 'description', 'picture', 'starting_price', 'datetime_finish', 'bet_increment', 'category'];
+    // Проверка заполненности обязательных полей и заполнение массива ошибок
+    $required = ['title', 'description', 'starting_price', 'datetime_finish', 'bet_increment', 'category'];
     $dict = ['title' => 'Наименование', 'description' => 'Описание', 'picture' => 'Изображение',
         'starting_price' => 'Начальная цена', 'datetime_finish' => 'Дата окончания торгов',
         'bet_increment' => 'Шаг ставки', 'category' => 'Категория'];
     $errors = [];
     foreach ($required as $key) {
-        if (empty($_POST[$key])) {
+        if (empty($_POST['lot'][$key])) {
             $errors[$key] = 'Это поле надо заполнить';
         }
     }
-    var_dump($errors);
-    exit();
+    // Проверяем наличие категории в списке категорий
+    $cat_id_one = $_POST['lot']['category'];
 
+    if (!in_array($cat_id_one, $cat_id_list)) {
+        $errors['category'] = 'Выберите категорию';
+    }
+
+    // Проверка типа данных в стоимости и шаге ставки
+    $required_int = ['starting_price', 'bet_increment'];
+    $min_req_int = 1;
+    foreach ($required_int as $val) {
+        if (!filter_var($_POST['lot'][$val], FILTER_VALIDATE_INT, ["options" => ["min_range"=>$min_req_int]])) {
+            $errors[$val] = 'Введите корректную сумму';
+        }
+    }
+
+    // Проверка загрузки изображения и MIME типа
     if ($_FILES['picture']['name'] !== '') {
+        $upload_state = true;
         $picture_type = mime_content_type($_FILES['picture']['tmp_name']);
 
         if ($picture_type !== "image/jpg" && $picture_type !== "image/png") {
@@ -45,10 +63,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errors['file'] = 'Вы не загрузили файл';
         print 'Вы не загрузили файл';
     }
+    if (count($errors)) {
+        $content = include_template('lot_add.php',
+            ['errors' => $errors, 'dict' => $dict, 'categories' => $categories]);
+    }
 }
-/*
-// Загрузка данных из формы в БД
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+
+// Загрузка данных из формы в БД. При успешном добавлении лота переадресация на его страницу
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && !count($errors)) {
     $lot = $_POST['lot'];
     $lot['current_price'] = $lot['starting_price'];
     $filename = uniqid() . '.jpg';
@@ -70,8 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $content = include_template('error.php', ['error' => mysqli_error($link)]);
     }
 }
-*/
 
+// Сборка страницы
 $layout = include_template('layout.php',
     ['categories' => $categories,
      'content' => $content,
