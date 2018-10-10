@@ -17,8 +17,9 @@ db_connection_error($link);
 $categories = categories($link);
 // Список id категорий
 $cat_id_list = array_column($categories, 'id');
+$errors = [];
 
-$content = include_template('lot_add.php', ['categories' => $categories]);
+$content = include_template('lot_add.php', ['categories' => $categories, 'errors' => $errors]);
 
 // Валидация данных из формы
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -27,16 +28,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $dict = ['title' => 'Наименование', 'description' => 'Описание', 'picture' => 'Изображение',
         'starting_price' => 'Начальная цена', 'datetime_finish' => 'Дата окончания торгов',
         'bet_increment' => 'Шаг ставки', 'category' => 'Категория'];
-    $errors = [];
+
     foreach ($required as $key) {
         if (empty($_POST['lot'][$key])) {
             $errors[$key] = 'Это поле надо заполнить';
         }
     }
     // Проверяем наличие категории в списке категорий
-    $cat_id_one = $_POST['lot']['category'];
+    $cat_id_sent = $_POST['lot']['category'];
 
-    if (!in_array($cat_id_one, $cat_id_list)) {
+    if (!in_array($cat_id_sent, $cat_id_list)) {
         $errors['category'] = 'Выберите категорию';
     }
 
@@ -56,12 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if ($picture_type !== "image/jpg" && $picture_type !== "image/png") {
             $errors['file'] = 'Загрузите картинку в формате JPG или PNG';
-            print 'Загрузите картинку в формате JPG или PNG';
         }
     }
     else {
         $errors['file'] = 'Вы не загрузили файл';
-        print 'Вы не загрузили файл';
     }
     if (count($errors)) {
         $content = include_template('lot_add.php',
