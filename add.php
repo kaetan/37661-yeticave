@@ -20,49 +20,51 @@ $cat_id_list = array_column($categories, 'id');
 // Массив с ошибками валидации
 $errors = [];
 
-$content = include_template('lot_add.php', ['categories' => $categories, 'errors' => $errors]);
-
 // Валидация данных из формы
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Вся информация о лоте, полученная из формы
+    $lot = $_POST['lot'];
     // Определяем необходимые поля
     $required = ['title', 'description', 'starting_price', 'datetime_finish', 'bet_increment'];
     // Отправленный из формы id категории
     $cat_id_sent = $_POST['lot']['category'];
     // Поля, в которые необходимо ввести число
     $required_int = ['starting_price', 'bet_increment'];
+    // Имя изображения, загруженного пользователем
+    $picture_name = $_FILES['picture']['name'];
+    // Временное имя изображения на сервере
+    $picture_name_temp = $_FILES['picture']['tmp_name'];
+    // Расширение изображения
+    $picture_ext = pathinfo($picture_name, PATHINFO_EXTENSION);
 
-    $errors = validate($errors, $cat_id_list, $required, $cat_id_sent, $required_int);
-}
-if (count($errors)) {
-    $content = include_template('lot_add.php', ['errors' => $errors, 'categories' => $categories]);
-}
+    $errors = validate($lot, $cat_id_list, $required, $cat_id_sent, $required_int, $picture_name, $picture_name_temp);
 
-// Загрузка данных из формы в БД
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && !count($errors)) {
-    $lot = $_POST['lot'];
-    $lot['current_price'] = $lot['starting_price'];
-    // По типу загруженного изображения определяем расширение будущего файла, задаем ему имя и перемещаем в папку img
-    if (mime_content_type($_FILES['picture']['tmp_name']) == "image/jpeg") {
-        $filename = uniqid() . '.jpg';
-    }
-    elseif (mime_content_type($_FILES['picture']['tmp_name']) == "image/png") {
-        $filename = uniqid() . '.png';
-    }
-    $lot['picture'] = 'img/' . $filename;
-    move_uploaded_file($_FILES['picture']['tmp_name'], 'img/' . $filename);
+    // При отсутствии ошибок валидации - загрузка данных из формы в БД
+    if (!count($errors)) {
+        $lot = $_POST['lot'];
+        $lot['current_price'] = $lot['starting_price'];
 
-    // Вызываем функцию добавления лота в БД. При успешном добавлении переходим на страницу лота
-    $result = lot_add($lot, $link);
-    if ($result) {
-        $lot_id = mysqli_insert_id($link);
+        // Задаем имя изображения и перемещаем в папку img
+        $filename = uniqid() . '.' .$picture_ext;
+        $lot['picture'] = 'img/' . $filename;
+        move_uploaded_file($_FILES['picture']['tmp_name'], 'img/' . $filename);
 
-        header("Location: lot.php?id=" . $lot_id);
-    } else {
-        $content = include_template('error.php', ['error' => mysqli_error($link)]);
+        // Вызываем функцию добавления лота в БД. При успешном добавлении переходим на страницу лота
+        $result = lot_add($lot, $link);
+        if ($result) {
+            $lot_id = mysqli_insert_id($link);
+
+            header("Location: lot.php?id=" . $lot_id);
+        } else {
+            $content = include_template('error.php', ['error' => mysqli_error($link)]);
+            print $content;
+            exit();
+        }
     }
 }
 
 // Сборка страницы
+$content = include_template('lot_add.php', ['errors' => $errors, 'categories' => $categories]);
 $layout = include_template('layout.php',
     ['categories' => $categories,
      'content' => $content,

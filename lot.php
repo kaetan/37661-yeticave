@@ -19,7 +19,7 @@ $categories = categories($link);
 // Запрос информации о лоте из БД
 // Переменная, отображающая наличие ошибки
 $error_state = true;
-$page_title ='';
+$page_title ='Лот:';
 // Если id задан, то выполнится функция запроса в БД
 // При несуществующем в базе id функция вернет пустой массив в переменную $lot_info
 // Статус ошибки в этом случае останется true и сработает 404
@@ -28,13 +28,14 @@ if(ISSET($_GET['id'])) {
     // Функция запрашивает необходимую информацию о лоте из БД
     $lot_info = lot_info($link, $lot_id);
     if($lot_info) {
-        $page_title = $lot_info['title'];
+        $page_title = $page_title . ' ' . $lot_info['title'];
         $content = include_template('lot_page.php',
             ['categories' => $categories, 'lot_info' => $lot_info]);
         $error_state = false;
     }
 }
 if ($error_state) {
+    $page_title = 'Лот не найден';
     $content = include_template('error.php', ['error' => '404 - страница не найдена']);
 }
 

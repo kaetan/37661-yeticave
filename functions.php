@@ -80,10 +80,11 @@ function db_get_prepare_stmt($link, $sql, $data = []) {
 }
 
 // Валидация формы загрузки лота
-function validate($errors, $cat_id_list, $required, $cat_id_sent, $required_int) {
+function validate($lot, $cat_id_list, $required, $cat_id_sent, $required_int, $picture_name, $picture_name_temp) {
+    $errors =[];
     // Проверка заполненности обязательных полей
     foreach ($required as $key) {
-        if (empty($_POST['lot'][$key])) {
+        if (empty($lot[$key])) {
             $errors[$key] = true;
         }
     }
@@ -92,15 +93,14 @@ function validate($errors, $cat_id_list, $required, $cat_id_sent, $required_int)
         $errors['category'] = true;
     }
     // Проверка типа данных в стоимости и шаге ставки
-    $min_req_int = 1;
     foreach ($required_int as $val) {
-        if (!filter_var($_POST['lot'][$val], FILTER_VALIDATE_INT, ["options" => ["min_range"=>$min_req_int]])) {
+        if (!filter_var($lot[$val], FILTER_VALIDATE_INT, ["options" => ["min_range"=>1]])) {
             $errors[$val] = true;
         }
     }
     // Проверка загрузки изображения и MIME типа
-    if ($_FILES['picture']['name'] !== '') {
-        $picture_type = mime_content_type($_FILES['picture']['tmp_name']);
+    if ($picture_name !== '') {
+        $picture_type = mime_content_type($picture_name_temp);
 
         if ($picture_type !== "image/jpeg" && $picture_type !== "image/png") {
             $errors['file'] = 'Загрузите картинку в формате JPG или PNG';
