@@ -9,36 +9,35 @@
         </ul>
     </nav>
     <section class="lot-item container">
-        <?php foreach ($lot_info as $val): ?>
-        <h2><?=$val['title']?></h2>
+        <h2><?=$lot_info['title']?></h2>
         <div class="lot-item__content">
             <div class="lot-item__left">
                 <div class="lot-item__image">
-                    <img src="img/lot-<?=$val['id']?>.jpg" width="730" height="548" alt="<?=$val['title']?>">
+                    <img src="<?=$lot_info['picture']?>" width="730" height="548" alt="<?=$lot_info['title']?>">
                 </div>
-                <p class="lot-item__category">Категория: <span><?=$val['category']?></span></p>
-                <p class="lot-item__description"><?=$val['description']?></p>
+                <p class="lot-item__category">Категория: <span><?=$lot_info['category']?></span></p>
+                <p class="lot-item__description"><?=$lot_info['description']?></p>
             </div>
             <div class="lot-item__right">
                 <div class="lot-item__state">
                     <div class="lot-item__timer timer">
-                        <?php print lot_timer($val['datetime_finish'])?>
+                        <?php print lot_timer($lot_info['datetime_finish'])?>
                     </div>
                     <div class="lot-item__cost-state">
                         <div class="lot-item__rate">
                             <span class="lot-item__amount">Текущая цена</span>
-                            <span class="lot-item__cost"><?=format_cost_no_ruble($val['current_price'])?></span>
+                            <span class="lot-item__cost"><?=format_cost_no_ruble($lot_info['current_price'])?></span>
                         </div>
                         <div class="lot-item__min-cost">
                             Мин. ставка <span>
-                                <?=format_cost_no_ruble($val['min_bet']);?> р
+                                <?=format_cost_no_ruble($lot_info['min_bet']);?> р
                             </span>
                         </div>
                     </div>
                     <form class="lot-item__form" action="https://echo.htmlacademy.ru" method="post">
                         <p class="lot-item__form-item">
                             <label for="cost">Ваша ставка</label>
-                            <input id="cost" type="number" name="cost" placeholder="<?=format_cost_no_ruble($val['min_bet']);?>">
+                            <input id="cost" type="number" name="cost" placeholder="<?=format_cost_no_ruble($lot_info['min_bet']);?>">
                         </p>
                         <button type="submit" class="button">Сделать ставку</button>
                     </form>
@@ -100,6 +99,5 @@
                 </div>
             </div>
         </div>
-        <? endforeach ?>
     </section>
 </main>
