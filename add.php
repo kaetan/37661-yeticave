@@ -17,73 +17,42 @@ db_connection_error($link);
 $categories = categories($link);
 // Список id категорий
 $cat_id_list = array_column($categories, 'id');
+// Массив с ошибками валидации
 $errors = [];
 
 $content = include_template('lot_add.php', ['categories' => $categories, 'errors' => $errors]);
 
 // Валидация данных из формы
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Проверка заполненности обязательных полей и заполнение массива ошибок
-    $required = ['title', 'description', 'starting_price', 'datetime_finish', 'bet_increment', 'category'];
-    $dict = ['title' => 'Наименование', 'description' => 'Описание', 'picture' => 'Изображение',
-        'starting_price' => 'Начальная цена', 'datetime_finish' => 'Дата окончания торгов',
-        'bet_increment' => 'Шаг ставки', 'category' => 'Категория'];
-
-    foreach ($required as $key) {
-        if (empty($_POST['lot'][$key])) {
-            $errors[$key] = 'Это поле надо заполнить';
-        }
-    }
-    // Проверяем наличие категории в списке категорий
+    // Определяем необходимые поля
+    $required = ['title', 'description', 'starting_price', 'datetime_finish', 'bet_increment'];
+    // Отправленный из формы id категории
     $cat_id_sent = $_POST['lot']['category'];
-
-    if (!in_array($cat_id_sent, $cat_id_list)) {
-        $errors['category'] = 'Выберите категорию';
-    }
-
-    // Проверка типа данных в стоимости и шаге ставки
+    // Поля, в которые необходимо ввести число
     $required_int = ['starting_price', 'bet_increment'];
-    $min_req_int = 1;
-    foreach ($required_int as $val) {
-        if (!filter_var($_POST['lot'][$val], FILTER_VALIDATE_INT, ["options" => ["min_range"=>$min_req_int]])) {
-            $errors[$val] = 'Введите корректную сумму';
-        }
-    }
 
-    // Проверка загрузки изображения и MIME типа
-    if ($_FILES['picture']['name'] !== '') {
-        $upload_state = true;
-        $picture_type = mime_content_type($_FILES['picture']['tmp_name']);
-
-        if ($picture_type !== "image/jpg" && $picture_type !== "image/png") {
-            $errors['file'] = 'Загрузите картинку в формате JPG или PNG';
-        }
-    }
-    else {
-        $errors['file'] = 'Вы не загрузили файл';
-    }
-    if (count($errors)) {
-        $content = include_template('lot_add.php',
-            ['errors' => $errors, 'dict' => $dict, 'categories' => $categories]);
-    }
+    $errors = validate($errors, $cat_id_list, $required, $cat_id_sent, $required_int);
+}
+if (count($errors)) {
+    $content = include_template('lot_add.php', ['errors' => $errors, 'categories' => $categories]);
 }
 
-
-// Загрузка данных из формы в БД. При успешном добавлении лота переадресация на его страницу
+// Загрузка данных из формы в БД
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && !count($errors)) {
     $lot = $_POST['lot'];
     $lot['current_price'] = $lot['starting_price'];
-    $filename = uniqid() . '.jpg';
+    // По типу загруженного изображения определяем расширение будущего файла, задаем ему имя и перемещаем в папку img
+    if (mime_content_type($_FILES['picture']['tmp_name']) == "image/jpeg") {
+        $filename = uniqid() . '.jpg';
+    }
+    elseif (mime_content_type($_FILES['picture']['tmp_name']) == "image/png") {
+        $filename = uniqid() . '.png';
+    }
     $lot['picture'] = 'img/' . $filename;
     move_uploaded_file($_FILES['picture']['tmp_name'], 'img/' . $filename);
 
-    $sql = "INSERT INTO lots
-            (datetime_start, title, description, picture, starting_price, current_price,
-            datetime_finish, bet_increment, category, owner)
-            VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?, 1)";
-    $stmt = db_get_prepare_stmt($link, $sql, [$lot['title'], $lot['description'], $lot['picture'],
-        $lot['starting_price'], $lot['current_price'], $lot['datetime_finish'], $lot['bet_increment'], $lot['category']]);
-    $result = mysqli_stmt_execute($stmt);
+    // Вызываем функцию добавления лота в БД. При успешном добавлении переходим на страницу лота
+    $result = lot_add($lot, $link);
     if ($result) {
         $lot_id = mysqli_insert_id($link);
 

@@ -79,6 +79,38 @@ function db_get_prepare_stmt($link, $sql, $data = []) {
     return $stmt;
 }
 
+// Валидация формы загрузки лота
+function validate($errors, $cat_id_list, $required, $cat_id_sent, $required_int) {
+    // Проверка заполненности обязательных полей
+    foreach ($required as $key) {
+        if (empty($_POST['lot'][$key])) {
+            $errors[$key] = true;
+        }
+    }
+    // Проверка наличия категории в списке категорий
+    if (!in_array($cat_id_sent, $cat_id_list)) {
+        $errors['category'] = true;
+    }
+    // Проверка типа данных в стоимости и шаге ставки
+    $min_req_int = 1;
+    foreach ($required_int as $val) {
+        if (!filter_var($_POST['lot'][$val], FILTER_VALIDATE_INT, ["options" => ["min_range"=>$min_req_int]])) {
+            $errors[$val] = true;
+        }
+    }
+    // Проверка загрузки изображения и MIME типа
+    if ($_FILES['picture']['name'] !== '') {
+        $picture_type = mime_content_type($_FILES['picture']['tmp_name']);
+
+        if ($picture_type !== "image/jpeg" && $picture_type !== "image/png") {
+            $errors['file'] = 'Загрузите картинку в формате JPG или PNG';
+        }
+    }
+    else {
+        $errors['file'] = 'Вы не загрузили файл';
+    }
+    return $errors;
+}
 
 // Вывод ошибки при неудачном подключении к БД
 function db_connection_error($link) {
@@ -138,9 +170,21 @@ function lot_info($link, $lot_id) {
             LEFT JOIN categories c ON c.id = category 
             WHERE l.id = $lot_id";
     if ($result = mysqli_query($link, $sql_lot)) {
-        $lot_info = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $lot_info = mysqli_fetch_assoc($result);
     } else {
         $lot_info = [];
     }
     return $lot_info;
+}
+
+// Загрузка лота из формы в БД
+function lot_add($lot, $link) {
+    $sql = "INSERT INTO lots
+            (datetime_start, title, description, picture, starting_price, current_price,
+            datetime_finish, bet_increment, category, owner)
+            VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?, 1)";
+    $stmt = db_get_prepare_stmt($link, $sql, [$lot['title'], $lot['description'], $lot['picture'],
+        $lot['starting_price'], $lot['current_price'], $lot['datetime_finish'], $lot['bet_increment'], $lot['category']]);
+    $result = mysqli_stmt_execute($stmt);
+    return $result;
 }
