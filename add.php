@@ -41,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // При отсутствии ошибок валидации - загрузка данных из формы в БД
     if (!count($errors)) {
-        $lot = $_POST['lot'];
         $lot['current_price'] = $lot['starting_price'];
 
         // Задаем имя изображения и перемещаем в папку img
