@@ -151,6 +151,38 @@ function validate_signup($link, $form, $required, $userpic_name_temp) {
     return $errors;
 }
 
+// Валидация формы логина
+function validate_login ($form) {
+    $errors = [];
+    // Проверка правильности email. Текст ошибки при некорректном email
+    if (!filter_var($form['email'], FILTER_VALIDATE_EMAIL)) {
+        $errors['email'] = 'Введите корректный email';
+    }
+    // Текст ошибки при пустом поле email. Эта проверка стоит на 2 месте, т.к. filter_var
+    // считает пустой email некорректным и присваивает ошибке несоответствующий текст
+    if (empty($form['email'])) {
+        $errors['email'] = 'Введите email';
+    }
+    // Текст ошибки при пустом поле password
+    if (empty($form['password'])) {
+        $errors['password'] = 'Введите пароль';
+    }
+    return $errors;
+}
+
+// Запрос данных пользователя по email
+function get_user($link, $email) {
+    $sql = "SELECT * FROM users WHERE email = '$email'";
+
+    if ($result = mysqli_query($link, $sql)) {
+        $user_info = mysqli_fetch_assoc($result);
+    } else {
+        print(db_error($link));
+        exit();
+    }
+    return $user_info;
+}
+
 // Вывод ошибки при неудачном подключении к БД
 function db_connection_error($link) {
     if (!$link) {
