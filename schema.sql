@@ -16,7 +16,8 @@ CREATE TABLE users (
   userpic TEXT,
   contacts TEXT,
   created_lots INT,
-  placed_bets INT
+  placed_bets INT,
+  token VARCHAR(64)
 );
 CREATE TABLE lots (
   id INT AUTO_INCREMENT PRIMARY KEY,

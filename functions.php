@@ -1,4 +1,25 @@
 <?php
+// Проверка аутентификации юзера
+function is_auth() {
+    if (isset($_SESSION['user'])) {
+        $is_auth = 1;
+    }
+    else {
+        $is_auth = 0;
+    }
+    return $is_auth;
+}
+
+// Получение имени пользователя, если он аутентифицирован
+function user_header($is_auth) {
+    $user_header = '';
+    if ($is_auth) {
+        $user_header = ['username' => $_SESSION['user']['username'],
+            'userpic' => $_SESSION['user']['userpic']];
+    }
+    return $user_header;
+}
+
 // Функция-шаблонизатор
 function include_template($name, $data) {
     $name = 'templates/' . $name;
