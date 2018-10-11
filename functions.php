@@ -112,6 +112,45 @@ function validate($lot, $cat_id_list, $required, $cat_id_sent, $required_int, $p
     return $errors;
 }
 
+// Валидация формы регистрации
+function validate_signup($link, $form, $required, $userpic_name_temp) {
+    $errors =[];
+    // Проверка заполненности обязательных полей
+    foreach ($required as $key) {
+        if (empty($form[$key])) {
+            $errors[$key] = true;
+        }
+    }
+    // Проверка правильности email. Текст ошибки при некорректном email
+    if (!filter_var($form['email'], FILTER_VALIDATE_EMAIL)) {
+        $errors['email'] = 'Введите корректный email';
+    }
+    // Проверка наличия email в БД. Текст ошибки при уже занятом email
+    else {
+        $email = mysqli_real_escape_string($link, $form['email']);
+        $sql = "SELECT id FROM users WHERE email = '$email'";
+        $res = mysqli_query($link, $sql);
+
+        if (mysqli_num_rows($res) > 0) {
+            $errors['email'] = 'Пользователь с этим email уже зарегистрирован';
+        }
+    }
+    // Текст ошибки при пустом поле email. Эта проверка стоит на последнем месте, т.к. filter_var
+    // считает пустой email некорректным и присваивает ошибке несоответствующий текст
+    if (empty($form['email'])) {
+        $errors['email'] = 'Введите email';
+    }
+
+    // Валидация аватарки по MIME типу
+    if ($userpic_name_temp !== '') {
+        $userpic_type = mime_content_type($userpic_name_temp);
+        if ($userpic_type !== "image/jpeg" && $userpic_type !== "image/png") {
+            $errors['userpic'] = 'Допустимый формат изображения: JPG или PNG';
+        }
+    }
+    return $errors;
+}
+
 // Вывод ошибки при неудачном подключении к БД
 function db_connection_error($link) {
     if (!$link) {
@@ -185,6 +224,16 @@ function lot_add($lot, $link) {
             VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?, 1)";
     $stmt = db_get_prepare_stmt($link, $sql, [$lot['title'], $lot['description'], $lot['picture'],
         $lot['starting_price'], $lot['current_price'], $lot['datetime_finish'], $lot['bet_increment'], $lot['category']]);
+    $result = mysqli_stmt_execute($stmt);
+    return $result;
+}
+
+// Добавление нового пользователя в БД
+function user_add($link, $form, $password) {
+    $sql = "INSERT INTO users (registration_date, email, username, password, contacts, userpic, token) 
+                VALUES (NOW(), ?, ?, ?, ?, ?, '')";
+    $stmt = db_get_prepare_stmt($link, $sql,
+        [$form['email'], $form['username'], $password, $form['contacts'], $form['userpic'] ]);
     $result = mysqli_stmt_execute($stmt);
     return $result;
 }
