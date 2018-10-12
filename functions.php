@@ -285,3 +285,75 @@ function user_add($link, $form, $password) {
     $result = mysqli_stmt_execute($stmt);
     return $result;
 }
+
+// Валидация значения ставки из формы добавления ставки
+function validate_bet($link, $cost, $lot_id) {
+    $bet_errors = '';
+    // Фильтруем полученное из формы значение
+    if (!filter_var($cost, FILTER_VALIDATE_INT, ["options" => ["min_range"=>0]])) {
+        $bet_errors = 'Введите ставку';
+    }
+    // Если значение корректно, то запрашиваем информацию о лоте из БД
+    else {
+        $lot_info = lot_info($link, $lot_id);
+
+        // Если информация о лоте получена и нет ошибок, то сравним ставку с минимальной ставкой
+        if (isset($lot_info['min_bet'])) {
+            if($cost < $lot_info['min_bet']) {
+                $bet_errors = 'Ставка не может быть меньше минимальной';
+            }
+        }
+        else {
+            print(include_template('error.php', ['error' => '404 - страница не найдена']));
+            exit();
+        }
+    }
+    return $bet_errors;
+}
+
+// Добавление ставки в БД
+function bet_add($link, $cost, $user_id, $lot_id) {
+    $sql = "INSERT INTO bets (datetime, bet, owner, lot)
+            VALUES (NOW(), ?, ?, ?)";
+    $stmt = db_get_prepare_stmt($link, $sql, [$cost, $user_id, $lot_id]);
+    $result = mysqli_stmt_execute($stmt);
+    if ($result) {
+        $update_current_price = "UPDATE lots SET current_price = $cost WHERE id = $lot_id";
+        $sql_price = mysqli_prepare($link, $update_current_price);
+        $res = mysqli_stmt_execute($sql_price);
+        if (!$res) {
+            print(db_error($link));
+            exit();
+        }
+    }
+    return $result;
+}
+
+// Обновление текущей цены лота после добавления ставки
+function update_current_price($link, $cost, $lot_id) {
+    $sql = "UPDATE lots SET current_price = $cost WHERE id = $lot_id";
+}
+
+// Запрос ставок из БД по id лота
+function request_bets($link, $lot_id) {
+    $sql = "SELECT b.id, datetime, bet, owner, lot, username
+            FROM bets b
+            LEFT JOIN users u ON b.owner = u.id
+            WHERE lot = $lot_id 
+            GROUP BY b.id
+            ORDER BY datetime DESC
+            LIMIT 10";
+    if ($result = mysqli_query($link, $sql)) {
+        $bets = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    } else {
+        $bets = [];
+    }
+    return $bets;
+}
+
+function good_date($bet_date) {
+    $bet_date = strtotime($bet_date);
+    $time_passed = strtotime("now") - $bet_date;
+    $words_sec = ['секунду', 'секунды', 'секунд'];
+    $words_hour = ['час', 'часа', 'часов'];
+}
