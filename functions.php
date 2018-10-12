@@ -353,7 +353,17 @@ function request_bets($link, $lot_id) {
 
 function good_date($bet_date) {
     $bet_date = strtotime($bet_date);
-    $time_passed = strtotime("now") - $bet_date;
-    $words_sec = ['секунду', 'секунды', 'секунд'];
-    $words_hour = ['час', 'часа', 'часов'];
+    $diff = strtotime("now") - $bet_date;
+    $time_passed = '';
+
+    if($diff < 60) {
+        $time_passed = $diff;
+    }
+    if ($diff >= 60 && $diff < 3600) {
+        $time_passed = floor($diff / 60);
+    }
+    if ($diff >= 3600 && $diff < 86400) {
+        $time_passed = floor($diff / 3600);
+    }
+    return $time_passed;
 }
