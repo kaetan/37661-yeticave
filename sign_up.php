@@ -1,15 +1,20 @@
 <?php
+session_start();
 // Таймзона
 date_default_timezone_set("Europe/Moscow");
-
-// Рандомайзер залогинен/не залогинен
-$is_auth = rand(0, 1);
 
 // Подключаем нужные файлы
 require_once 'functions.php';
 require_once 'data.php';
 require_once 'init.php';
 
+// Проверка аутентификации юзера
+$is_auth = is_auth();
+// Если залогинен, то здесь юзеру делать нечего, переадресовываем на главную
+if ($is_auth) {
+    header("Location: index.php");
+    exit();
+}
 // Проверка подключения к БД и вывод ошибки, если она имеется
 db_connection_error($link);
 
@@ -65,8 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
-
-
 
 $content = include_template('sign_up.php', ['errors' => $errors, 'categories' => $categories]);
 $layout = include_template('layout.php',

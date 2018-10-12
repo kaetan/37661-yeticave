@@ -1,15 +1,17 @@
 <?php
+session_start();
 // Таймзона
 date_default_timezone_set("Europe/Moscow");
-
-// Рандомайзер залогинен/не залогинен
-$is_auth = rand(0, 1);
 
 // Подключаем нужные файлы
 require_once 'functions.php';
 require_once 'data.php';
 require_once 'init.php';
 
+// Проверка аутентификации юзера
+$is_auth = is_auth();
+// Массив с аватарой и именем пользователя, если он залогинен
+$user_header = user_header($is_auth);
 // Проверка подключения к БД и вывод ошибки, если она имеется
 db_connection_error($link);
 
@@ -30,7 +32,7 @@ if(ISSET($_GET['id'])) {
     if($lot_info) {
         $page_title = $page_title . ' ' . $lot_info['title'];
         $content = include_template('lot_page.php',
-            ['categories' => $categories, 'lot_info' => $lot_info]);
+            ['categories' => $categories, 'lot_info' => $lot_info, 'is_auth' => $is_auth]);
         $error_state = false;
     }
 }
@@ -42,7 +44,8 @@ if ($error_state) {
 // Собираем страницу и выводим ее на экран
 $layout = include_template('layout.php',
     ['content' => $content,
-     'is_auth' => $is_auth,
-     'categories' => $categories,
-     'title' => $page_title]);
+        'is_auth' => $is_auth,
+        'categories' => $categories,
+        'user_header' => $user_header,
+        'title' => $page_title]);
 print($layout);
