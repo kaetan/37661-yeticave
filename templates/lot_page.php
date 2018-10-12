@@ -9,31 +9,41 @@
         </ul>
     </nav>
     <section class="lot-item container">
-        <h2><?=$lot_info['title']?></h2>
+
+        <!-- Название лота -->
+        <h2><?=strip_tags($lot_info['title'])?></h2>
         <div class="lot-item__content">
             <div class="lot-item__left">
+                <!-- Фотография лота -->
                 <div class="lot-item__image">
-                    <img src="<?=$lot_info['picture']?>" width="730" height="548" alt="<?=$lot_info['title']?>">
+                    <img src="<?=$lot_info['picture']?>" width="730" height="548" alt="<?=strip_tags($lot_info['title'])?>">
                 </div>
+                <!-- Категория -->
                 <p class="lot-item__category">Категория: <span><?=$lot_info['category']?></span></p>
-                <p class="lot-item__description"><?=$lot_info['description']?></p>
+                <!-- Описание лота -->
+                <p class="lot-item__description"><?=strip_tags($lot_info['description'])?></p>
             </div>
             <div class="lot-item__right">
+                <?php if ($is_auth) { ?>
                 <div class="lot-item__state">
+                    <!-- Время до завершения торгов -->
                     <div class="lot-item__timer timer">
                         <?php print lot_timer($lot_info['datetime_finish'])?>
                     </div>
                     <div class="lot-item__cost-state">
+                        <!-- Текущая цена -->
                         <div class="lot-item__rate">
                             <span class="lot-item__amount">Текущая цена</span>
                             <span class="lot-item__cost"><?=format_cost_no_ruble($lot_info['current_price'])?></span>
                         </div>
+                        <!-- Минимальная ставка -->
                         <div class="lot-item__min-cost">
                             Мин. ставка <span>
                                 <?=format_cost_no_ruble($lot_info['min_bet']);?> р
                             </span>
                         </div>
                     </div>
+                    <!-- Добавить ставку -->
                     <form class="lot-item__form" action="https://echo.htmlacademy.ru" method="post">
                         <p class="lot-item__form-item">
                             <label for="cost">Ваша ставка</label>
@@ -42,6 +52,7 @@
                         <button type="submit" class="button">Сделать ставку</button>
                     </form>
                 </div>
+                <?php } ?>
                 <div class="history">
                     <h3>История ставок (<span>10</span>)</h3>
                     <table class="history__list">

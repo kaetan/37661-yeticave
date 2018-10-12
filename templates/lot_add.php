@@ -18,7 +18,7 @@
         $title = $_POST['lot']['title'] ?? ''; ?>
         <div class="form__item <?=$classname;?>"> <!-- form__item--invalid -->
           <label for="lot-name">Наименование</label>
-          <input id="lot-name" type="text" name="lot[title]" value="<?=$title?>" placeholder="Введите наименование лота" required>
+          <input id="lot-name" type="text" name="lot[title]" value="<?=strip_tags($title)?>" placeholder="Введите наименование лота" required>
           <span class="form__error">Введите наименование лота</span>
         </div>
 
@@ -44,7 +44,7 @@
       $description = $_POST['lot']['description'] ?? ''; ?>
       <div class="form__item form__item--wide <?=$classname;?>">
         <label for="message">Описание</label>
-        <textarea id="message" name="lot[description]" placeholder="Напишите описание лота" required><?=$description?></textarea>
+        <textarea id="message" name="lot[description]" placeholder="Напишите описание лота" required><?=strip_tags($description)?></textarea>
         <span class="form__error">Напишите описание лота</span>
       </div>
 
@@ -77,7 +77,7 @@
         $starting_price = $_POST['lot']['starting_price'] ?? ''; ?>
         <div class="form__item form__item--small <?=$classname;?>">
           <label for="lot-rate">Начальная цена</label>
-          <input id="lot-rate" type="number" name="lot[starting_price]" value="<?=$starting_price?>" placeholder="0" required>
+          <input id="lot-rate" type="number" name="lot[starting_price]" value="<?=strip_tags($starting_price)?>" placeholder="0" required>
           <span class="form__error">Введите начальную цену</span>
         </div>
 
@@ -86,7 +86,7 @@
         $bet_increment = $_POST['lot']['bet_increment'] ?? ''; ?>
         <div class="form__item form__item--small <?=$classname;?>">
           <label for="lot-step">Шаг ставки</label>
-          <input id="lot-step" type="number" name="lot[bet_increment]" value="<?=$bet_increment?>" placeholder="0" required>
+          <input id="lot-step" type="number" name="lot[bet_increment]" value="<?=strip_tags($bet_increment)?>" placeholder="0" required>
           <span class="form__error">Введите шаг ставки</span>
         </div>
 
@@ -96,7 +96,7 @@
         <div class="form__item <?=$classname;?>">
           <label for="lot-date">Дата окончания торгов</label>
           <input class="form__input-date" id="lot-date" type="date"
-                 name="lot[datetime_finish]" value="<?=$datetime_finish?>" required>
+                 name="lot[datetime_finish]" value="<?=strip_tags($datetime_finish)?>" required>
           <span class="form__error">Введите дату завершения торгов</span>
         </div>
       </div>
