@@ -1,12 +1,7 @@
 <?php
 // Проверка аутентификации юзера
 function is_auth() {
-    if (isset($_SESSION['user'])) {
-        $is_auth = 1;
-    }
-    else {
-        $is_auth = 0;
-    }
+    $is_auth = isset($_SESSION['user']) ? 1 : 0;
     return $is_auth;
 }
 
