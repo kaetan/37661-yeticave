@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set("UTC");
 // Проверка аутентификации юзера
 function is_auth() {
     $is_auth = isset($_SESSION['user']) ? 1 : 0;
@@ -269,7 +270,7 @@ function lot_add($lot, $link) {
     $sql = "INSERT INTO lots
             (datetime_start, title, description, picture, starting_price, current_price,
             datetime_finish, bet_increment, category, owner)
-            VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?, 1)";
+            VALUES (UTC_TIMESTAMP(), ?, ?, ?, ?, ?, ?, ?, ?, 1)";
     $stmt = db_get_prepare_stmt($link, $sql, [$lot['title'], $lot['description'], $lot['picture'],
         $lot['starting_price'], $lot['current_price'], $lot['datetime_finish'], $lot['bet_increment'], $lot['category']]);
     $result = mysqli_stmt_execute($stmt);
@@ -279,7 +280,7 @@ function lot_add($lot, $link) {
 // Добавление нового пользователя в БД
 function user_add($link, $form, $password) {
     $sql = "INSERT INTO users (registration_date, email, username, password, contacts, userpic, token) 
-                VALUES (NOW(), ?, ?, ?, ?, ?, '')";
+                VALUES (UTC_TIMESTAMP(), ?, ?, ?, ?, ?, '')";
     $stmt = db_get_prepare_stmt($link, $sql,
         [$form['email'], $form['username'], $password, $form['contacts'], $form['userpic'] ]);
     $result = mysqli_stmt_execute($stmt);
@@ -314,7 +315,7 @@ function validate_bet($link, $cost, $lot_id) {
 // Добавление ставки в БД
 function bet_add($link, $cost, $user_id, $lot_id) {
     $sql = "INSERT INTO bets (datetime, bet, owner, lot)
-            VALUES (NOW(), ?, ?, ?)";
+            VALUES (UTC_TIMESTAMP(), ?, ?, ?)";
     $stmt = db_get_prepare_stmt($link, $sql, [$cost, $user_id, $lot_id]);
     $result = mysqli_stmt_execute($stmt);
     if ($result) {
@@ -327,11 +328,6 @@ function bet_add($link, $cost, $user_id, $lot_id) {
         }
     }
     return $result;
-}
-
-// Обновление текущей цены лота после добавления ставки
-function update_current_price($link, $cost, $lot_id) {
-    $sql = "UPDATE lots SET current_price = $cost WHERE id = $lot_id";
 }
 
 // Запрос ставок из БД по id лота
