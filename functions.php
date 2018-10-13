@@ -351,19 +351,44 @@ function request_bets($link, $lot_id) {
     return $bets;
 }
 
-function good_date($bet_date) {
+// Функция склонения слов по количеству
+function plural($amount, $argument) {
+    if ($amount%10 == 1 && $amount%100 != 11) {
+        $correct_word = $argument[0];
+    }
+    elseif ($amount%10 >= 2 && $amount%10 <= 4 && ($amount%100 < 10 || $amount%100 >= 20)) {
+        $correct_word = $argument[1];
+    }
+    else {
+        $correct_word = $argument[2];
+    }
+    return $correct_word;
+}
+
+// Функция вывода интервала времени в "человеческом" формате
+function human_date($bet_date) {
+    $good_date ='';
     $bet_date = strtotime($bet_date);
     $diff = strtotime("now") - $bet_date;
-    $time_passed = '';
+    $sec = ['секунду','секунды','секунд'];
+    $min = ['минуту','минуты','минут'];
+    $hour = ['час','часа','часов'];
 
     if($diff < 60) {
         $time_passed = $diff;
+        $good_date = $time_passed . ' ' . plural($time_passed, $sec) . ' назад';
     }
     if ($diff >= 60 && $diff < 3600) {
         $time_passed = floor($diff / 60);
+        $good_date = $time_passed . ' ' . plural($time_passed, $min) . ' назад';
     }
     if ($diff >= 3600 && $diff < 86400) {
         $time_passed = floor($diff / 3600);
+        $good_date = $time_passed . ' ' . plural($time_passed, $hour) . ' назад';
     }
-    return $time_passed;
+    if ($diff >= 86400) {
+        $good_date = date('d.m.y в H:i', $bet_date);
+    }
+    return $good_date;
 }
+

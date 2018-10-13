@@ -67,7 +67,7 @@
                         <tr class="history__item">
                             <td class="history__name"><?=(strip_tags($key['username']));?></td>
                             <td class="history__price"><?php print(format_cost_no_ruble(strip_tags($key['bet']))); ?> р</td>
-                            <td class="history__time"><?=date('d.m.y в H:i', strtotime($key['datetime']));?></td>
+                            <td class="history__time"><?=human_date($key['datetime']);?></td>
                         </tr>
                         <? endforeach ?>
                     </table>
