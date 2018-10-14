@@ -97,7 +97,7 @@
           <label for="lot-date">Дата окончания торгов</label>
           <input class="form__input-date" id="lot-date" type="date"
                  name="lot[datetime_finish]" value="<?=strip_tags($datetime_finish)?>" required>
-          <span class="form__error">Введите дату завершения торгов</span>
+          <span class="form__error"><? if (isset($errors['datetime_finish'])) : print($errors['datetime_finish']); endif; ?></span>
         </div>
       </div>
 
