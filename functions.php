@@ -126,6 +126,13 @@ function validate($lot, $cat_id_list, $required, $cat_id_sent, $required_int, $p
     else {
         $errors['file'] = 'Вы не загрузили файл';
     }
+    // Проверка даты окончания торгов
+    if (empty($lot['datetime_finish'])) {
+        $errors['datetime_finish'] = 'Введите дату завершения торгов';
+    }
+    elseif (strtotime($lot['datetime_finish']) < strtotime('tomorrow')) {
+        $errors['datetime_finish'] = 'Торги должны проходить минимум до следующего дня';
+    }
     return $errors;
 }
 

@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Вся информация о лоте, полученная из формы
     $lot = $_POST['lot'];
     // Определяем необходимые поля
-    $required = ['title', 'description', 'starting_price', 'datetime_finish', 'bet_increment'];
+    $required = ['title', 'description', 'starting_price', 'bet_increment'];
     // Отправленный из формы id категории
     $cat_id_sent = $_POST['lot']['category'];
     // Поля, в которые необходимо ввести число
