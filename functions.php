@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set("UTC");
 // Проверка аутентификации юзера
 function is_auth() {
     $is_auth = isset($_SESSION['user']) ? 1 : 0;
@@ -124,6 +125,13 @@ function validate($lot, $cat_id_list, $required, $cat_id_sent, $required_int, $p
     }
     else {
         $errors['file'] = 'Вы не загрузили файл';
+    }
+    // Проверка даты окончания торгов
+    if (empty($lot['datetime_finish'])) {
+        $errors['datetime_finish'] = 'Введите дату завершения торгов';
+    }
+    elseif (strtotime($lot['datetime_finish']) < strtotime('tomorrow')) {
+        $errors['datetime_finish'] = 'Торги должны проходить минимум до следующего дня';
     }
     return $errors;
 }
@@ -269,7 +277,7 @@ function lot_add($lot, $link) {
     $sql = "INSERT INTO lots
             (datetime_start, title, description, picture, starting_price, current_price,
             datetime_finish, bet_increment, category, owner)
-            VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?, 1)";
+            VALUES (UTC_TIMESTAMP(), ?, ?, ?, ?, ?, ?, ?, ?, 1)";
     $stmt = db_get_prepare_stmt($link, $sql, [$lot['title'], $lot['description'], $lot['picture'],
         $lot['starting_price'], $lot['current_price'], $lot['datetime_finish'], $lot['bet_increment'], $lot['category']]);
     $result = mysqli_stmt_execute($stmt);
@@ -279,9 +287,111 @@ function lot_add($lot, $link) {
 // Добавление нового пользователя в БД
 function user_add($link, $form, $password) {
     $sql = "INSERT INTO users (registration_date, email, username, password, contacts, userpic, token) 
-                VALUES (NOW(), ?, ?, ?, ?, ?, '')";
+                VALUES (UTC_TIMESTAMP(), ?, ?, ?, ?, ?, '')";
     $stmt = db_get_prepare_stmt($link, $sql,
         [$form['email'], $form['username'], $password, $form['contacts'], $form['userpic'] ]);
     $result = mysqli_stmt_execute($stmt);
     return $result;
 }
+
+// Валидация значения ставки из формы добавления ставки
+function validate_bet($link, $cost, $lot_id) {
+    $bet_errors = '';
+    // Фильтруем полученное из формы значение
+    if (!filter_var($cost, FILTER_VALIDATE_INT, ["options" => ["min_range"=>0]])) {
+        $bet_errors = 'Введите ставку';
+    }
+    // Если значение корректно, то запрашиваем информацию о лоте из БД
+    else {
+        $lot_info = lot_info($link, $lot_id);
+
+        // Если информация о лоте получена и нет ошибок, то сравним ставку с минимальной ставкой
+        if (isset($lot_info['min_bet'])) {
+            if($cost < $lot_info['min_bet']) {
+                $bet_errors = 'Ставка не может быть меньше минимальной';
+            }
+        }
+        else {
+            print(include_template('error.php', ['error' => '404 - страница не найдена']));
+            exit();
+        }
+    }
+    return $bet_errors;
+}
+
+// Добавление ставки в БД
+function bet_add($link, $cost, $user_id, $lot_id) {
+    $sql = "INSERT INTO bets (datetime, bet, owner, lot)
+            VALUES (UTC_TIMESTAMP(), ?, ?, ?)";
+    $stmt = db_get_prepare_stmt($link, $sql, [$cost, $user_id, $lot_id]);
+    $result = mysqli_stmt_execute($stmt);
+    if ($result) {
+        $update_current_price = "UPDATE lots SET current_price = $cost WHERE id = $lot_id";
+        $sql_price = mysqli_prepare($link, $update_current_price);
+        $res = mysqli_stmt_execute($sql_price);
+        if (!$res) {
+            print(db_error($link));
+            exit();
+        }
+    }
+    return $result;
+}
+
+// Запрос ставок из БД по id лота
+function request_bets($link, $lot_id) {
+    $sql = "SELECT b.id, datetime, bet, owner, lot, username
+            FROM bets b
+            LEFT JOIN users u ON b.owner = u.id
+            WHERE lot = $lot_id 
+            GROUP BY b.id
+            ORDER BY datetime DESC
+            LIMIT 10";
+    if ($result = mysqli_query($link, $sql)) {
+        $bets = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    } else {
+        $bets = [];
+    }
+    return $bets;
+}
+
+// Функция склонения слов по количеству
+function plural($amount, $argument) {
+    if ($amount%10 == 1 && $amount%100 != 11) {
+        $correct_word = $argument[0];
+    }
+    elseif ($amount%10 >= 2 && $amount%10 <= 4 && ($amount%100 < 10 || $amount%100 >= 20)) {
+        $correct_word = $argument[1];
+    }
+    else {
+        $correct_word = $argument[2];
+    }
+    return $correct_word;
+}
+
+// Функция вывода интервала времени в "человеческом" формате
+function human_date($bet_date) {
+    $good_date ='';
+    $bet_date = strtotime($bet_date);
+    $diff = strtotime("now") - $bet_date;
+    $sec = ['секунду','секунды','секунд'];
+    $min = ['минуту','минуты','минут'];
+    $hour = ['час','часа','часов'];
+
+    if($diff < 60) {
+        $time_passed = $diff;
+        $good_date = $time_passed . ' ' . plural($time_passed, $sec) . ' назад';
+    }
+    if ($diff >= 60 && $diff < 3600) {
+        $time_passed = floor($diff / 60);
+        $good_date = $time_passed . ' ' . plural($time_passed, $min) . ' назад';
+    }
+    if ($diff >= 3600 && $diff < 86400) {
+        $time_passed = floor($diff / 3600);
+        $good_date = $time_passed . ' ' . plural($time_passed, $hour) . ' назад';
+    }
+    if ($diff >= 86400) {
+        $good_date = date('d.m.y в H:i', $bet_date);
+    }
+    return $good_date;
+}
+

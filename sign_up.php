@@ -1,11 +1,10 @@
 <?php
 session_start();
 // Таймзона
-date_default_timezone_set("Europe/Moscow");
+date_default_timezone_set("UTC");
 
 // Подключаем нужные файлы
 require_once 'functions.php';
-require_once 'data.php';
 require_once 'init.php';
 
 // Проверка аутентификации юзера
