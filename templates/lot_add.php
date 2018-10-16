@@ -31,7 +31,7 @@
             <option>Выберите категорию</option>
             <? foreach ($categories as $val): ?>
             <option value="<?=$val['id']?>"
-                <? if ($val['id'] == $category) : print('selected'); endif; ?>
+                <? if ($val['id'] === $category) : print('selected'); endif; ?>
             ><?=$val['title']?></option>
             <? endforeach ?>
           </select>

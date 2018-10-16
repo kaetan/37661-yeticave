@@ -39,7 +39,7 @@ if(ISSET($_GET['id'])) {
     }
 }
 // Отправка формы добавления ставки
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $is_auth) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_auth) {
     // Получаем id лота из формы добавления ставки
     $lot_id = $_POST['lot_id'];
     // Получаем сумму ставки
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $is_auth) {
     $bet_errors = validate_bet($link, $cost, $lot_id);
 
     // Если ошибок нет, то добавляем ставку в БД и обновляем страницу
-    if ($bet_errors == '') {
+    if ($bet_errors === '') {
         // Вызываем функцию добавления ставки в БД. При успешном добавлении переходим на страницу лота
         $result = bet_add($link, $cost, $user_id, $lot_id);
         if ($result) {

@@ -116,7 +116,7 @@ function validate($lot, $cat_id_list, $required, $cat_id_sent, $required_int, $p
         }
     }
     // Проверка загрузки изображения и MIME типа
-    if ($picture_name !== '') {
+    if (!empty($picture_name)) {
         $picture_type = mime_content_type($picture_name_temp);
 
         if ($picture_type !== "image/jpeg" && $picture_type !== "image/png") {
@@ -356,7 +356,7 @@ function request_bets($link, $lot_id) {
 
 // Функция склонения слов по количеству
 function plural($amount, $argument) {
-    if ($amount%10 == 1 && $amount%100 != 11) {
+    if ($amount%10 === 1 && $amount%100 !== 11) {
         $correct_word = $argument[0];
     }
     elseif ($amount%10 >= 2 && $amount%10 <= 4 && ($amount%100 < 10 || $amount%100 >= 20)) {

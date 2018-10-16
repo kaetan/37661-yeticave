@@ -22,7 +22,7 @@ $categories = categories($link);
 // Массив с ошибками, изначально пустой
 $errors = [];
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Информация из формы регистрации
     $form = $_POST['signup'];
     // Объявление обязательных к заполнению полей

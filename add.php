@@ -22,7 +22,7 @@ $cat_id_list = array_column($categories, 'id');
 $errors = [];
 
 // Валидация данных из формы
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Вся информация о лоте, полученная из формы
     $lot = $_POST['lot'];
     // Определяем необходимые поля
