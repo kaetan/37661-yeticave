@@ -1,12 +1,19 @@
 <?php
 date_default_timezone_set("UTC");
-// Проверка аутентификации юзера
+
+/** Проверка аутентификации юзера
+ * @return int
+ */
 function is_auth() {
     $is_auth = isset($_SESSION['user']) ? 1 : 0;
     return $is_auth;
 }
 
-// Получение имени пользователя, если он аутентифицирован
+
+/** Получение имени пользователя, если он аутентифицирован
+ * @param $is_auth
+ * @return array|string
+ */
 function user_header($is_auth) {
     $user_header = '';
     if ($is_auth) {
@@ -97,6 +104,16 @@ function db_get_prepare_stmt($link, $sql, $data = []) {
 }
 
 // Валидация формы загрузки лота
+/**
+ * @param $lot
+ * @param $cat_id_list
+ * @param $required
+ * @param $cat_id_sent
+ * @param $required_int
+ * @param $picture_name
+ * @param $picture_name_temp
+ * @return array
+ */
 function validate($lot, $cat_id_list, $required, $cat_id_sent, $required_int, $picture_name, $picture_name_temp) {
     $errors =[];
     // Проверка заполненности обязательных полей
@@ -319,7 +336,16 @@ function validate_bet($link, $cost, $lot_id) {
     return $bet_errors;
 }
 
-// Добавление ставки в БД
+/**
+ * Добавление ставки в БД
+ *
+ * Функция добавляет ставку в БД и, если добавление успешно, обновляет текущую цену лота
+ * @param object $link Объект, представляющий подключение к серверу MySQL
+ * @param int $cost Прошедшее валидацию значение ставки
+ * @param int $user_id Идентификатор пользователя, сделавшего ставку
+ * @param int $lot_id Идентификатор лота, на который сделана ставка
+ * @return bool Логический результат успеха/неудачи функции
+ */
 function bet_add($link, $cost, $user_id, $lot_id) {
     $sql = "INSERT INTO bets (datetime, bet, owner, lot)
             VALUES (UTC_TIMESTAMP(), ?, ?, ?)";
