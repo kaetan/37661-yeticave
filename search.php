@@ -17,15 +17,34 @@ db_connection_error($link);
 // Запрос категорий из БД
 $categories = categories($link);
 
-// Запрос лотов из БД
-$lots = lots($link, '');
+$lots = [];
+$not_found = true;
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // Данные из строки поиска записываем в переменную
+    $search_unsafe = $_GET['q'];
+    $search = mysqli_real_escape_string($link, $search_unsafe) ?? '';
+
+    if ($search) {
+        $additional_where = '&& MATCH(l.title, l.description) AGAINST("'.$search.'")';
+        $lots = lots($link, $additional_where);
+        if ($lots) {
+            $not_found = false;
+        }
+    }
+}
 
 // Собираем страницу и выводим ее на экран
-$content = include_template('main.php', ['lots' => $lots, 'categories' => $categories]);
+$content = include_template('search.php',
+    ['not_found' => $not_found,
+        'search_unsafe' => $search_unsafe,
+        'lots' => $lots,
+        'categories' => $categories]);
+
 $layout = include_template('layout.php',
     ['content' => $content,
         'is_auth' => $is_auth,
         'user_header' => $user_header,
         'categories' => $categories,
-        'title' => 'Главная']);
+        'title' => 'Результаты поиска']);
 print($layout);

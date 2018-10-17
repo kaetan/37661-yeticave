@@ -17,7 +17,7 @@
         $email = $_POST['email'] ?? ''; ?>
         <div class="form__item <?=$classname;?>"> <!-- form__item--invalid -->
             <label for="email">E-mail*</label>
-            <input id="email" type="text" name="email" value = "<?=strip_tags($email);?>" placeholder="Введите e-mail" required>
+            <input id="email" type="text" name="email" value = "<?=htmlspecialchars($email);?>" placeholder="Введите e-mail" required>
             <span class="form__error"><?=$errors['email']; ?></span>
         </div>
 

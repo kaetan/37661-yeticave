@@ -55,3 +55,7 @@ SELECT datetime, bet, username, l.title
 FROM bets b, users u, lots l
 WHERE b.lot = 1 AND b.lot = l.id AND b.owner = u.id
 ORDER BY datetime DESC;
+
+/* добавление индекса полнотекстового поиска */
+CREATE FULLTEXT INDEX lot_search
+ON lots(title, description);

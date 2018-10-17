@@ -324,17 +324,18 @@ function categories($link) {
 /**
  * Запрос лотов из БД
  *
- * Возвращает массив с информацией о лотах
+ * Возвращает массив с информацией о лотах, возможно использование дополнительного условия
  * @param mysqli $link Объект, представляющий подключение к серверу MySQL
+ * @param string $additional_where Дополнительное условие для выборки лотов из БД
  * @return array|null
  */
-function lots($link) {
+function lots($link, $additional_where) {
     $sql_lots = "SELECT l.id, l.title, starting_price, current_price, picture, datetime_finish, c.title as category, COUNT(b.id) as bets_quantity
             FROM lots l
             LEFT JOIN categories c ON c.id = category
-            LEFT JOIN bets b ON l.id = b.lot WHERE datetime_finish > CURRENT_TIMESTAMP
+            LEFT JOIN bets b ON l.id = b.lot WHERE datetime_finish > CURRENT_TIMESTAMP $additional_where
             GROUP BY l.id
-            ORDER BY datetime_start DESC LIMIT 6";
+            ORDER BY datetime_start DESC LIMIT 9";
     if ($result = mysqli_query($link, $sql_lots)) {
         $lots = mysqli_fetch_all($result, MYSQLI_ASSOC);
     } else {

@@ -15,20 +15,23 @@
             <a class="main-header__logo" href="index.php">
                 <img src="img/logo.svg" width="160" height="39" alt="Логотип компании YetiCave">
             </a>
-            <form class="main-header__search" method="get" action="https://echo.htmlacademy.ru">
-                <input type="search" name="search" placeholder="Поиск лота">
-                <input class="main-header__search-btn" type="submit" name="find" value="Найти">
+
+            <!-- Поиск лота -->
+            <form class="main-header__search" method="get" action="search.php">
+                <input type="search" name="q" placeholder="Поиск лота">
+                <input class="main-header__search-btn" type="submit" name="" value="Найти">
             </form>
+
             <a class="main-header__add-lot button" href="add.php">Добавить лот</a>
 
             <nav class="user-menu">
                 <?php if ($is_auth): ?>
                     <div class="user-menu__image">
                         <?php $userpic = !empty($user_header['userpic']) ? $user_header['userpic'] : "img/user.jpg"; ?>
-                        <img src="<?=$userpic;?>" width="40" height="40" alt="<?=strip_tags($user_header['username']);?>">
+                        <img src="<?=$userpic;?>" width="40" height="40" alt="<?=htmlspecialchars($user_header['username']);?>">
                     </div>
                     <div class="user-menu__logged">
-                        <p><?=strip_tags($user_header['username']);?></p>
+                        <p><?=htmlspecialchars($user_header['username']);?></p>
                         <a href="logout.php">Выйти</a>
                     </div>
                 <?php else: ?>

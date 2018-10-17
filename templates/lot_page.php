@@ -11,17 +11,17 @@
     <section class="lot-item container">
 
         <!-- Название лота -->
-        <h2><?=strip_tags($lot_info['title'])?></h2>
+        <h2><?=htmlspecialchars($lot_info['title'])?></h2>
         <div class="lot-item__content">
             <div class="lot-item__left">
                 <!-- Фотография лота -->
                 <div class="lot-item__image">
-                    <img src="<?=$lot_info['picture']?>" width="730" height="548" alt="<?=strip_tags($lot_info['title'])?>">
+                    <img src="<?=$lot_info['picture']?>" width="730" height="548" alt="<?=htmlspecialchars($lot_info['title'])?>">
                 </div>
                 <!-- Категория -->
                 <p class="lot-item__category">Категория: <span><?=$lot_info['category']?></span></p>
                 <!-- Описание лота -->
-                <p class="lot-item__description"><?=strip_tags($lot_info['description'])?></p>
+                <p class="lot-item__description"><?=htmlspecialchars($lot_info['description'])?></p>
             </div>
             <div class="lot-item__right">
                 <?php if ($is_auth) { ?>
@@ -65,8 +65,8 @@
                     <table class="history__list">
                         <?php foreach($bets as $key) : ?>
                         <tr class="history__item">
-                            <td class="history__name"><?=(strip_tags($key['username']));?></td>
-                            <td class="history__price"><?php print(format_cost(strip_tags($key['bet']), 0)); ?> р</td>
+                            <td class="history__name"><?=(htmlspecialchars($key['username']));?></td>
+                            <td class="history__price"><?php print(format_cost(htmlspecialchars($key['bet']), 0)); ?> р</td>
                             <td class="history__time"><?=human_date($key['datetime']);?></td>
                         </tr>
                         <? endforeach ?>
