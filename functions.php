@@ -1,7 +1,9 @@
 <?php
 date_default_timezone_set("UTC");
 
-/** Проверка аутентификации юзера
+/**
+ * Проверка аутентификации юзера
+ *
  * @return int
  */
 function is_auth() {
@@ -9,13 +11,15 @@ function is_auth() {
     return $is_auth;
 }
 
-
-/** Получение имени пользователя, если он аутентифицирован
- * @param $is_auth
- * @return array|string
+/**
+ * Получение имени пользователя, если он аутентифицирован
+ *
+ * Возвращает массив с юзернеймом и аватаркой для шапки сайта
+ * @param bool $is_auth 1 - пользователь аутентифицирова, 0 - нет
+ * @return array
  */
 function user_header($is_auth) {
-    $user_header = '';
+    $user_header = [];
     if ($is_auth) {
         $user_header = ['username' => $_SESSION['user']['username'],
             'userpic' => $_SESSION['user']['userpic']];
@@ -23,7 +27,14 @@ function user_header($is_auth) {
     return $user_header;
 }
 
-// Функция-шаблонизатор
+/**
+ * Функция-шаблонизатор
+ *
+ * Функция принимает имя шаблона и данные и собирает его
+ * @param string $name Имя шаблона
+ * @param array $data Данные, передаваемые в шаблон
+ * @return false|string
+ */
 function include_template($name, $data) {
     $name = 'templates/' . $name;
     $result = '';
@@ -41,21 +52,30 @@ function include_template($name, $data) {
     return $result;
 };
 
-// Функция форматирования цены. Добавляет пробел между каждыми тремя знаками и добавляет символ рубля
-function format_cost($cost) {
+/**
+ * Функция форматирования цены
+ *
+ * Добавляет пробел между каждыми тремя знаками. При заданном ruble добавляет символ рубля
+ * @param int $cost Число, которое необходимо отформатировать
+ * @param bool $ruble 1 - добавить знак рубля, 0 - не добавлять
+ * @return string
+ */
+function format_cost($cost, $ruble) {
     $cost = ceil($cost);
     $cost = number_format($cost, 0, ',', ' ');
-    $cost = $cost . "<b class=\"rub\">р</b>";
-    return($cost);
-};
-// Функция форматирования цены. Добавляет пробел между каждыми тремя знаками
-function format_cost_no_ruble($cost) {
-    $cost = ceil($cost);
-    $cost = number_format($cost, 0, ',', ' ');
+    if ($ruble) {
+        $cost = $cost . "<b class=\"rub\">р</b>";
+    }
     return($cost);
 };
 
-// Функция-таймер для лотов. Считает, сколько часов и минут осталось до окончания лота
+/**
+ * Функция-таймер для лотов
+ *
+ * Считает, сколько часов и минут осталось до окончания торгов лота
+ * @param string $datetime_finish Время завершения торгов лота
+ * @return string
+ */
 function lot_timer($datetime_finish) {
     $seconds = strtotime($datetime_finish) - strtotime('now');
     $hours = floor($seconds / 3600);
@@ -67,7 +87,14 @@ function lot_timer($datetime_finish) {
     return $lot_time;
 };
 
-// Подготовленное выражение
+/**
+ * Подготовленное выражение
+ *
+ * @param mysqli $link Объект, представляющий подключение к серверу MySQL
+ * @param string $sql MySQL запрос
+ * @param array $data Массив данных, участвующих в запросе
+ * @return bool|mysqli_stmt
+ */
 function db_get_prepare_stmt($link, $sql, $data = []) {
     $stmt = mysqli_prepare($link, $sql);
 
@@ -103,16 +130,18 @@ function db_get_prepare_stmt($link, $sql, $data = []) {
     return $stmt;
 }
 
-// Валидация формы загрузки лота
 /**
- * @param $lot
- * @param $cat_id_list
- * @param $required
- * @param $cat_id_sent
- * @param $required_int
- * @param $picture_name
- * @param $picture_name_temp
- * @return array
+ * Валидация формы загрузки лота
+ *
+ * Выполняет валидацию всех полей формы добавления лота, возвращает массив с ошибками заполнения формы
+ * @param array $lot Информация о лоте из полей формы
+ * @param array $cat_id_list Идентификаторы имеющихся в БД категорий
+ * @param array $required Список необходимых полей без уникального текста ошибки
+ * @param string $cat_id_sent Отправленный из формы идентификатор категории
+ * @param array $required_int Значения цены и шага ставки из формы, обязаны быть положительными числами
+ * @param string $picture_name Имя файла изображения, загруженного пользователем
+ * @param string $picture_name_temp Временное имя файла изображения на сервере
+ * @return array Массив с ошибками валидации и текстами ошибок
  */
 function validate($lot, $cat_id_list, $required, $cat_id_sent, $required_int, $picture_name, $picture_name_temp) {
     $errors =[];
@@ -153,7 +182,16 @@ function validate($lot, $cat_id_list, $required, $cat_id_sent, $required_int, $p
     return $errors;
 }
 
-// Валидация формы регистрации
+/**
+ * Валидация формы регистрации
+ *
+ * Выполняет валидацию всех полей формы регистрации, возвращает массив с ошибками заполнения формы
+ * @param mysqli $link Объект, представляющий подключение к серверу MySQL
+ * @param array $form Данные, полученные из формы
+ * @param array $required Список необходимых для заполнения данных
+ * @param string $userpic_name_temp Временное имя файла аватарки пользователя на сервере
+ * @return array Массив с ошибками и текстами ошибок
+ */
 function validate_signup($link, $form, $required, $userpic_name_temp) {
     $errors =[];
     // Проверка заполненности обязательных полей
@@ -192,7 +230,12 @@ function validate_signup($link, $form, $required, $userpic_name_temp) {
     return $errors;
 }
 
-// Валидация формы логина
+/**
+ * Валидация формы логина
+ *
+ * @param array $form Данные, полученные из формы логина
+ * @return array Массив с ошибками валидации и текстами ошибок
+ */
 function validate_login ($form) {
     $errors = [];
     // Проверка правильности email. Текст ошибки при некорректном email
@@ -211,7 +254,14 @@ function validate_login ($form) {
     return $errors;
 }
 
-// Запрос данных пользователя по email
+/**
+ * Запрос данных пользователя по email
+ *
+ * Возвращает массив со всей информацией о пользователе по предоставленному email
+ * @param mysqli $link Объект, представляющий подключение к серверу MySQL
+ * @param string $email email
+ * @return array|null
+ */
 function get_user($link, $email) {
     $sql = "SELECT * FROM users WHERE email = '$email'";
 
@@ -224,7 +274,11 @@ function get_user($link, $email) {
     return $user_info;
 }
 
-// Вывод ошибки при неудачном подключении к БД
+/**
+ * Вывод ошибки при неудачном подключении к БД
+ *
+ * @param mysqli $link Объект, представляющий подключение к серверу MySQL
+ */
 function db_connection_error($link) {
     if (!$link) {
         $error = mysqli_connect_error();
@@ -235,7 +289,12 @@ function db_connection_error($link) {
     }
 };
 
-// Вывод ошибки запроса из БД
+/**
+ * Вывод ошибки запроса из БД
+ *
+ * @param mysqli $link Объект, представляющий подключение к серверу MySQL
+ * @return false|string
+ */
 function db_error($link) {
     $error = mysqli_error($link);
     $content = include_template('error.php', ['error' => $error]);
@@ -243,7 +302,13 @@ function db_error($link) {
     return $layout;
 };
 
-// Запрос категорий из БД
+/**
+ * Запрос категорий из БД
+ *
+ * Возвращает массив категорий товаров и их идентификаторов
+ * @param mysqli $link Объект, представляющий подключение к серверу MySQL
+ * @return array|null
+ */
 function categories($link) {
     $sql_categories = "SELECT id, title FROM categories ORDER BY id ASC";
     $result = mysqli_query($link, $sql_categories);
@@ -256,7 +321,13 @@ function categories($link) {
     return $categories;
 };
 
-// Запрос лотов из БД
+/**
+ * Запрос лотов из БД
+ *
+ * Возвращает массив с информацией о лотах
+ * @param mysqli $link Объект, представляющий подключение к серверу MySQL
+ * @return array|null
+ */
 function lots($link) {
     $sql_lots = "SELECT l.id, l.title, starting_price, current_price, picture, datetime_finish, c.title as category, COUNT(b.id) as bets_quantity
             FROM lots l
@@ -273,7 +344,14 @@ function lots($link) {
     return $lots;
 };
 
-// Запрос лота по id
+/**
+ * Запрос лота по id
+ *
+ * Возвращает массив информации об одном конкретном лоте по переданному идентификатору
+ * @param mysqli $link Объект, представляющий подключение к серверу MySQL
+ * @param string $lot_id Идентификатор лота
+ * @return array|null
+ */
 function lot_info($link, $lot_id) {
     $sql_lot = "SELECT l.id, l.title, picture, c.title as category, 
                       description, datetime_finish, current_price, 
@@ -289,7 +367,15 @@ function lot_info($link, $lot_id) {
     return $lot_info;
 }
 
-// Загрузка лота из формы в БД
+/**
+ * Добавление лота в БД
+ *
+ * Добавляет в БД запись с информацией о лоте, полученной из полей формы добавления лота,
+ * возвращает успех или неудачу выполнения запроса
+ * @param array $lot Информация лота из полей формы
+ * @param mysqli $link Объект, представляющий подключение к серверу MySQL
+ * @return bool
+ */
 function lot_add($lot, $link) {
     $sql = "INSERT INTO lots
             (datetime_start, title, description, picture, starting_price, current_price,
@@ -301,7 +387,15 @@ function lot_add($lot, $link) {
     return $result;
 }
 
-// Добавление нового пользователя в БД
+/**
+ * Добавление нового пользователя в БД
+ *
+ * Добавляет пользователя в БД, возвращает успех или неудачу выполнения запроса
+ * @param mysqli $link Объект, представляющий подключение к серверу MySQL
+ * @param array $form Информация из полей формы регистрации, кроме пароля
+ * @param string $password Хэшированный пароль из формы регистрации
+ * @return bool
+ */
 function user_add($link, $form, $password) {
     $sql = "INSERT INTO users (registration_date, email, username, password, contacts, userpic, token) 
                 VALUES (UTC_TIMESTAMP(), ?, ?, ?, ?, ?, '')";
@@ -311,7 +405,15 @@ function user_add($link, $form, $password) {
     return $result;
 }
 
-// Валидация значения ставки из формы добавления ставки
+/**
+ * Валидация ставки
+ *
+ * Проверяет значение ставки из формы добавления ставки, возвращает строку с текстом ошибки
+ * @param mysqli $link Объект, представляющий подключение к серверу MySQL
+ * @param string $cost Числовое значение ставки из формы
+ * @param string $lot_id Идентификатор лота, к которому добавляется ставка
+ * @return string
+ */
 function validate_bet($link, $cost, $lot_id) {
     $bet_errors = '';
     // Фильтруем полученное из формы значение
@@ -340,7 +442,7 @@ function validate_bet($link, $cost, $lot_id) {
  * Добавление ставки в БД
  *
  * Функция добавляет ставку в БД и, если добавление успешно, обновляет текущую цену лота
- * @param object $link Объект, представляющий подключение к серверу MySQL
+ * @param mysqli $link Объект, представляющий подключение к серверу MySQL
  * @param int $cost Прошедшее валидацию значение ставки
  * @param int $user_id Идентификатор пользователя, сделавшего ставку
  * @param int $lot_id Идентификатор лота, на который сделана ставка
@@ -363,7 +465,14 @@ function bet_add($link, $cost, $user_id, $lot_id) {
     return $result;
 }
 
-// Запрос ставок из БД по id лота
+/**
+ * Запрос ставок из БД по id лота
+ *
+ * Возвращает массив с данными о ставках конкретного лота
+ * @param mysqli $link Объект, представляющий подключение к серверу MySQL
+ * @param string $lot_id Идентификатор лота
+ * @return array|null
+ */
 function request_bets($link, $lot_id) {
     $sql = "SELECT b.id, datetime, bet, owner, lot, username
             FROM bets b
@@ -380,7 +489,18 @@ function request_bets($link, $lot_id) {
     return $bets;
 }
 
-// Функция склонения слов по количеству
+/**
+ * Функция склонения слов по количеству
+ *
+ * Массив с формами склонения сущности задается по следующим правилам
+ * первое значение - количество заканчивается на 1, но не на 11
+ * второе значение - количество заканчивается на 2, 3, 4, но вне интервала от 10 до 20 включительно
+ * третье значение - все остальные случаи
+ * пример массива с формами склонения: ['секунду', 'секунды', 'секунд']
+ * @param int $amount Количество сущности
+ * @param array $argument Массив с формами склонения сущности
+ * @return mixed
+ */
 function plural($amount, $argument) {
     if ($amount%10 === 1 && $amount%100 !== 11) {
         $correct_word = $argument[0];
@@ -394,7 +514,14 @@ function plural($amount, $argument) {
     return $correct_word;
 }
 
-// Функция вывода интервала времени в "человеческом" формате
+/**
+ * Функция вывода интервала времени в "человеческом" формате
+ *
+ * Считает, сколько прошло времени с указанного момента в прошлом и отображает
+ * этот интервал в удобном для восприятия формате, используя функцию склонения слов
+ * @param string $bet_date Прошедшая дата, для которой надо посчитать интервал
+ * @return false|string
+ */
 function human_date($bet_date) {
     $good_date ='';
     $bet_date = strtotime($bet_date);

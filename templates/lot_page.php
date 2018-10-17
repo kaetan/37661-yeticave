@@ -34,12 +34,12 @@
                         <!-- Текущая цена -->
                         <div class="lot-item__rate">
                             <span class="lot-item__amount">Текущая цена</span>
-                            <span class="lot-item__cost"><?=format_cost_no_ruble($lot_info['current_price'])?></span>
+                            <span class="lot-item__cost"><?=format_cost($lot_info['current_price'], 0)?></span>
                         </div>
                         <!-- Минимальная ставка -->
                         <div class="lot-item__min-cost">
                             Мин. ставка <span>
-                                <?=format_cost_no_ruble($lot_info['min_bet']);?> р
+                                <?=format_cost($lot_info['min_bet'], 0);?> р
                             </span>
                         </div>
                     </div>
@@ -49,7 +49,7 @@
                         <p class="lot-item__form-item <?=$classname;?>">
                             <input type="hidden" name = "lot_id" value="<?=$lot_info['id'];?>">
                             <label for="cost">Ваша ставка</label>
-                            <input id="cost" type="number" name="cost" placeholder="<?=format_cost_no_ruble($lot_info['min_bet']);?>">
+                            <input id="cost" type="number" name="cost" placeholder="<?=format_cost($lot_info['min_bet'], 0);?>">
                         </p>
                         <button type="submit" class="button">Сделать ставку</button>
                     </form>
@@ -66,7 +66,7 @@
                         <?php foreach($bets as $key) : ?>
                         <tr class="history__item">
                             <td class="history__name"><?=(strip_tags($key['username']));?></td>
-                            <td class="history__price"><?php print(format_cost_no_ruble(strip_tags($key['bet']))); ?> р</td>
+                            <td class="history__price"><?php print(format_cost(strip_tags($key['bet']), 0)); ?> р</td>
                             <td class="history__time"><?=human_date($key['datetime']);?></td>
                         </tr>
                         <? endforeach ?>

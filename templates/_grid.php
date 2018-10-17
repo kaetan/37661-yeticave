@@ -12,8 +12,8 @@
                     <div class="lot__rate">
                         <span class="lot__amount">Стартовая цена</span>
                         <span class="lot__cost">
-                                  <?php print(format_cost(strip_tags($lot['starting_price']))); ?>
-                              </span>
+                            <?php print(format_cost(strip_tags($lot['starting_price']), 1)); ?>
+                        </span>
                     </div>
                     <div class="lot__timer timer">
                         <?php print lot_timer($lot['datetime_finish'])?>

@@ -20,7 +20,6 @@ $categories = categories($link);
 // Запрос лотов из БД
 $lots = lots($link);
 
-
 // Собираем страницу и выводим ее на экран
 $content = include_template('main.php', ['lots' => $lots, 'categories' => $categories]);
 $layout = include_template('layout.php',
