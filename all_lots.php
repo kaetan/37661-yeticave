@@ -20,8 +20,14 @@ $categories = categories($link);
 $cat_id_list = array_column($categories, 'id');
 // Пустое значение переданной категории
 $category_title = '';
-// Запрос лотов из БД
-$lots = lots($link, 0, '', 0, '');
+// Значения для отключения поиска
+$is_search = 0;
+$search_param = '';
+// Значения такие, как если бы категория не была указана
+$is_category = 0;
+$verified_category_id = '';
+// Устанавливаем текст ссылок для пагинатора
+$page_link = 'all_lots.php?';
 
 // Если передан id категории, то проверим его, и затем выведем лоты этой категории
 if(isset($_GET['cat'])) {
@@ -31,15 +37,28 @@ if(isset($_GET['cat'])) {
         $cat_array_id = array_search($category_id, $cat_id_list);
         // Получаем название категории из подмассива
         $category_title = $categories[$cat_array_id]['title'];
-        // Запрашиваем лоты по указанной категории
-        $lots = lots($link, 0, '', 1, $category_id);
+        // Устанавливаем значения для запроса лотов из указанной категории
+        $is_category = 1;
+        $verified_category_id = $category_id;
+        // Устанавливаем текст ссылок для пагинатора
+        $page_link = 'all_lots.php?cat='.$verified_category_id.'&';
     }
 }
+
+require_once '_pagination.php';
+
+
+$pagination = include_template('_pagination.php',
+    ['pages_count' => $pages_count,
+        'page_link' => $page_link,
+        'current_page' => $current_page,
+        'pages' => $pages]);
 
 $content = include_template('all_lots.php',
     ['lots' => $lots,
         'category_title' => $category_title,
-        'categories' => $categories]);
+        'categories' => $categories,
+        'pagination' => $pagination]);
 $layout = include_template('layout.php',
     ['content' => $content,
         'is_auth' => $is_auth,

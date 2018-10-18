@@ -333,10 +333,15 @@ function categories($link) {
  * @param string $search_param Поисковый запрос
  * @param bool $is_category Устанавливает выборку лотов по категории
  * @param string $category_id Идентификатор категории лота
+ * @param int $items_limit Максимальное количество выводимых лотов
+ * @param int $items_offset Смещение для вывода лотов
  * @return array|null
  */
-function lots($link, $is_search, $search_param, $is_category, $category_id) {
+function lots($link, $is_search, $search_param, $is_category, $category_id, $items_limit, $items_offset) {
     $additional_where = '';
+    $set_limit = '';
+    $set_offset = '';
+
     if ($is_search && !$is_category) {
         $additional_where = '&& MATCH(l.title, l.description) AGAINST("'.$search_param.'")';
     }
@@ -346,12 +351,20 @@ function lots($link, $is_search, $search_param, $is_category, $category_id) {
     if ($is_search && $is_category) {
         $additional_where = '&& MATCH(l.title, l.description) AGAINST("'.$search_param.'") && l.category = '.$category_id;
     }
+    if ($items_limit) {
+        $set_limit = 'LIMIT '.$items_limit;
+    }
+    if ($items_offset) {
+        $set_offset = 'OFFSET '.$items_offset;
+    }
+
+
     $sql_lots = "SELECT l.id, l.title, starting_price, current_price, picture, datetime_finish, c.title as category, COUNT(b.id) as bets_quantity
             FROM lots l
             LEFT JOIN categories c ON c.id = category
             LEFT JOIN bets b ON l.id = b.lot WHERE datetime_finish > UTC_TIMESTAMP $additional_where
             GROUP BY l.id
-            ORDER BY datetime_start DESC LIMIT 9";
+            ORDER BY datetime_start DESC $set_limit $set_offset";
     if ($result = mysqli_query($link, $sql_lots)) {
         $lots = mysqli_fetch_all($result, MYSQLI_ASSOC);
     } else {
