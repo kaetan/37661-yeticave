@@ -22,12 +22,11 @@ $not_found = true;
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Данные из строки поиска записываем в переменную
-    $search_unsafe = $_GET['q'];
+    $search_unsafe = trim($_GET['q']);
     $search = mysqli_real_escape_string($link, $search_unsafe) ?? '';
 
     if ($search) {
-        $additional_where = '&& MATCH(l.title, l.description) AGAINST("'.$search.'")';
-        $lots = lots($link, $additional_where);
+        $lots = lots($link, 1, $search, 0, '');
         if ($lots) {
             $not_found = false;
         }

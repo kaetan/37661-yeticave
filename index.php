@@ -18,7 +18,7 @@ db_connection_error($link);
 $categories = categories($link);
 
 // Запрос лотов из БД
-$lots = lots($link, '');
+$lots = lots($link, 0, '', 0, '');
 
 // Собираем страницу и выводим ее на экран
 $content = include_template('main.php', ['lots' => $lots, 'categories' => $categories]);

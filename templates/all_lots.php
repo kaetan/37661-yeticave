@@ -10,11 +10,12 @@
     </nav>
     <div class="container">
         <section class="lots">
-            <?php if (!$not_found) { ?>
-                <h2>Результаты поиска по запросу «<span><?=htmlspecialchars($search_unsafe); ?></span>»</h2>
-            <?php ;} else { ?>
-                <h2>Ничего не найдено по вашему запросу</h2>
-            <?php ;} ?>
+            <h2>
+                Все лоты
+                <?php if ($category_title) { ?>
+                в категории <span>«<?=$category_title;?>»</span>
+                <?php ;} ?>
+            </h2>
             <ul class="lots__list">
                 <?php foreach ($lots as $lot): ?>
                     <li class="lots__item lot">
@@ -26,12 +27,15 @@
                             <h3 class="lot__title"><a class="text-link" href="lot.php?id=<?=$lot['id']; ?>"><?=htmlspecialchars($lot['title']); ?></a></h3>
                             <div class="lot__state">
                                 <div class="lot__rate">
-                                    <span class="lot__amount">Стартовая цена</span>
-                                    <span class="lot__cost">
-                                    <?php print(format_cost(htmlspecialchars($lot['starting_price']), 1)); ?>
-                                    </span>
+                                    <?php
+                                    $b_q = $lot['bets_quantity'];
+                                    $price_text = $b_q === '0' ? "Стартовая цена" : $b_q .' '. plural($b_q, ['ставка','ставки','ставок']);
+                                    ?>
+                                    <span class="lot__amount"><?=$price_text;?></span>
+                                    <span class="lot__cost"><?php print(format_cost(htmlspecialchars($lot['current_price']), 1)); ?></span>
                                 </div>
-                                <div class="lot__timer timer">
+                                <?php $classname = (strtotime($lot['datetime_finish']) - strtotime('now')) < 3600 ? "timer--finishing" : ""; ?>
+                                <div class="lot__timer timer <?=$classname;?>">
                                     <?php print lot_timer($lot['datetime_finish'])?>
                                 </div>
                             </div>

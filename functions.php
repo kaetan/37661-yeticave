@@ -77,13 +77,16 @@ function format_cost($cost, $ruble) {
  * @return string
  */
 function lot_timer($datetime_finish) {
-    $seconds = strtotime($datetime_finish) - strtotime('now');
-    $hours = floor($seconds / 3600);
-    $minutes = floor(($seconds % 3600) / 60);
-    if ($minutes < 10) {
-        $minutes = '0'.$minutes;
-    };
-    $lot_time = $hours.":".$minutes;
+    $diff = strtotime($datetime_finish) - strtotime('now');
+    $hours = floor($diff / 3600);
+    $minutes = floor(($diff % 3600) / 60);
+    $seconds = $diff % 60;
+
+    $hours = $hours < 10 ? '0'.$hours : $hours;
+    $minutes = $minutes < 10 ? '0'.$minutes : $minutes;
+    $seconds = $seconds < 10 ? '0'.$seconds : $seconds;
+
+    $lot_time = $hours.":".$minutes.':'.$seconds;
     return $lot_time;
 };
 
@@ -326,14 +329,27 @@ function categories($link) {
  *
  * Возвращает массив с информацией о лотах, возможно использование дополнительного условия
  * @param mysqli $link Объект, представляющий подключение к серверу MySQL
- * @param string $additional_where Дополнительное условие для выборки лотов из БД
+ * @param bool $is_search Устанавливает выборку лотов по поисковому запросу
+ * @param string $search_param Поисковый запрос
+ * @param bool $is_category Устанавливает выборку лотов по категории
+ * @param string $category_id Идентификатор категории лота
  * @return array|null
  */
-function lots($link, $additional_where) {
+function lots($link, $is_search, $search_param, $is_category, $category_id) {
+    $additional_where = '';
+    if ($is_search && !$is_category) {
+        $additional_where = '&& MATCH(l.title, l.description) AGAINST("'.$search_param.'")';
+    }
+    if ($is_category && !$is_search) {
+        $additional_where = '&& l.category = '.$category_id;
+    }
+    if ($is_search && $is_category) {
+        $additional_where = '&& MATCH(l.title, l.description) AGAINST("'.$search_param.'") && l.category = '.$category_id;
+    }
     $sql_lots = "SELECT l.id, l.title, starting_price, current_price, picture, datetime_finish, c.title as category, COUNT(b.id) as bets_quantity
             FROM lots l
             LEFT JOIN categories c ON c.id = category
-            LEFT JOIN bets b ON l.id = b.lot WHERE datetime_finish > CURRENT_TIMESTAMP $additional_where
+            LEFT JOIN bets b ON l.id = b.lot WHERE datetime_finish > UTC_TIMESTAMP $additional_where
             GROUP BY l.id
             ORDER BY datetime_start DESC LIMIT 9";
     if ($result = mysqli_query($link, $sql_lots)) {
