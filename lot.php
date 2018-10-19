@@ -42,10 +42,11 @@ if(ISSET($_GET['id'])) {
 
         // Если есть информация по лоту, то запросим его ставки
         $bets = request_bets($link, $lot_id);
+        $bets_owners = array_column($bets, 'owner');
 
         $time_left = strtotime($lot_info['datetime_finish']) - strtotime('now');
 
-        if ($lot_info['owner'] === $user_id or $time_left <= 0 or $user_id == $lot_info['owner']) {
+        if ($lot_info['owner'] === $user_id or $time_left <= 0 or in_array($user_id, $bets_owners)) {
             $hide_bet_form = true;
         }
     }

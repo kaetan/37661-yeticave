@@ -6,6 +6,10 @@ date_default_timezone_set("UTC");
 // Подключаем нужные файлы
 require_once 'functions.php';
 require_once 'init.php';
+require_once 'vendor/autoload.php';
+
+require_once 'getwinner.php';
+
 
 // Количество лотов на странице
 $ITEMS_LIMIT = 6;

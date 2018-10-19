@@ -45,10 +45,10 @@
                     <? if ($time_left < 3600 && $time_left > 0) { ?>
                     <div class="timer timer--finishing"><?=lot_timer($bet['lot_finish'])?></div>
 
-                    <? ;} elseif (strtotime($bet['lot_finish']) - strtotime('now') <= 0) { ?>
+                    <? ;} elseif (strtotime($bet['lot_finish']) - strtotime('now') <= 0 && $classname !== "rates__item--win") { ?>
                     <div class="timer timer--end">Торги окончены</div>
 
-                    <? } elseif ($bet['winner'] === $user_id) { ?>
+                    <? } elseif ($classname === "rates__item--win") { ?>
                     <div class="timer timer--win">Ставка выиграла</div>
 
                     <? ;} else { ?>

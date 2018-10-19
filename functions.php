@@ -586,3 +586,38 @@ function bets($link, $user_id) {
     }
     return $bets;
 }
+
+function mail_winner($email, $username, $id, $title) {
+    $transport = new Swift_SmtpTransport("phpdemo.ru", 25);
+    $transport->setUsername("keks@phpdemo.ru");
+    $transport->setPassword("htmlacademy");
+
+    $mailer = new Swift_Mailer($transport);
+
+    $logger = new Swift_Plugins_Loggers_ArrayLogger();
+    $mailer->registerPlugin(new Swift_Plugins_LoggerPlugin($logger));
+
+    $recipients[$email] = $username;
+
+    $message = new Swift_Message();
+    $message->setSubject("Ваша ставка победила!");
+    $message->setFrom(['keks@phpdemo.ru' => 'YetiCave']);
+    $message->setBcc($recipients);
+
+    $msg_content = include_template('email.php',
+        ['id' => $id,
+            'title' => $title,
+            'username' => $username]);
+
+    $message->setBody($msg_content, 'text/html');
+
+    $result = $mailer->send($message);
+    if ($result) {
+        $final_result = "Рассылка успешно отправлена";
+    }
+    else {
+        $final_result = "Не удалось отправить рассылку: " . $logger->dump();
+    }
+
+    return $final_result;
+}
