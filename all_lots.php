@@ -23,12 +23,6 @@ $bad_page = false;
 $cat_id_list = array_column($categories, 'id');
 // Пустое значение переданной категории
 $category_title = '';
-// Значения для отключения поиска
-$is_search = 0;
-$search_param = '';
-// Значения такие, как если бы категория не была указана
-$is_category = 0;
-$verified_category_id = '';
 // Устанавливаем текст ссылок для пагинатора
 $page_link = 'all_lots.php?';
 
@@ -44,12 +38,12 @@ if(isset($_GET['cat'])) {
         $is_category = 1;
         $verified_category_id = $category_id;
         // Устанавливаем текст ссылок для пагинатора
-        $page_link = 'all_lots.php?cat='.$verified_category_id.'&';
+        $page_link = 'all_lots.php?cat='.$category_id.'&';
     }
 }
 
 // Считаем, сколько всего лотов запрошено
-$total_items = count(lots($link, $is_search, $search_param, $is_category, $verified_category_id, '', ''));
+$total_items = count(lots($link, '', $category_id));
 // Максимальное количество лотов на странице
 $page_items = 9;
 //Количество страниц. Convert to int
@@ -71,7 +65,7 @@ else {
     $offset = ($current_page - 1) * $page_items;
 
     // Запрашиваем лоты по указанной категории, указываем количество выводимых лотов и смещение
-    $lots = lots($link, $is_search, $search_param, $is_category, $verified_category_id, $page_items, $offset);
+    $lots = lots($link, '', $category_id, $page_items, $offset);
 }
 
 

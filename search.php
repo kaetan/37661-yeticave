@@ -17,15 +17,16 @@ db_connection_error($link);
 // Запрос категорий из БД
 $categories = categories($link);
 
+// Пустой массив для лотов
 $lots = [];
+// Переменная для "ничего не найдено"
 $not_found = true;
-$pages_count = NULL;
-$page_link = '';
-$current_page = '';
-$pages = [];
+// Переменная для пустой пагинации
+$pagination = '';
+// Переменная для пустого поиска
 $search_unsafe = '';
+// Переменная для некорректного номера страницы
 $bad_page = false;
-
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['q'])) {
@@ -35,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['q'])) {
 
     if ($search) {
         // Считаем, сколько всего лотов нашлось
-        $total_items = count(lots($link, 1, $search, 0, '', '', ''));
+        $total_items = count(lots($link, $search));
 
         // Максимальное количество лотов на странице
         $page_items = 9;
@@ -58,8 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['q'])) {
             // Оффсет для каждой страницы
             $offset = ($current_page - 1) * $page_items;
 
-            // Запрашиваем лоты по указанной категории
-            $lots = lots($link, 1, $search, 0, '', $page_items, $offset);
+            // Запрашиваем лоты по указанному поисковому запросу
+            $lots = lots($link, $search, '', $page_items, $offset);
 
             // Устанавливаем текст ссылок для пагинатора
             $page_link = 'search.php?q='.$search.'&';
@@ -67,16 +68,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['q'])) {
             if ($lots !== []) {
                 $not_found = false;
             }
+            $pagination = include_template('_pagination.php',
+                ['pages_count' => $pages_count,
+                    'page_link' => $page_link,
+                    'current_page' => $current_page,
+                    'pages' => $pages]);
         }
+
     }
 }
 
 // Собираем страницу и выводим ее на экран
-$pagination = include_template('_pagination.php',
-    ['pages_count' => $pages_count,
-        'page_link' => $page_link,
-        'current_page' => $current_page,
-        'pages' => $pages]);
+
 $content = include_template('search.php',
     ['not_found' => $not_found,
         'bad_page' => $bad_page,

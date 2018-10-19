@@ -31,7 +31,7 @@
                         <img src="<?=$userpic;?>" width="40" height="40" alt="<?=htmlspecialchars($user_header['username']);?>">
                     </div>
                     <div class="user-menu__logged">
-                        <p><?=htmlspecialchars($user_header['username']);?></p>
+                        <a href="my_lots.php"><p><?=htmlspecialchars($user_header['username']);?></p></a>
                         <a href="logout.php">Выйти</a>
                     </div>
                 <?php else: ?>

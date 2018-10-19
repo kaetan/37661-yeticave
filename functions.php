@@ -329,35 +329,30 @@ function categories($link) {
  *
  * Возвращает массив с информацией о лотах, возможно использование дополнительного условия
  * @param mysqli $link Объект, представляющий подключение к серверу MySQL
- * @param bool $is_search Устанавливает выборку лотов по поисковому запросу
  * @param string $search_param Поисковый запрос
- * @param bool $is_category Устанавливает выборку лотов по категории
  * @param string $category_id Идентификатор категории лота
  * @param int $items_limit Максимальное количество выводимых лотов
  * @param int $items_offset Смещение для вывода лотов
  * @return array|null
  */
-function lots($link, $is_search, $search_param, $is_category, $category_id, $items_limit, $items_offset) {
+function lots($link, $search_param = '', $category_id = '', $items_limit = NULL, $items_offset = NULL) {
     $additional_where = '';
     $set_limit = '';
     $set_offset = '';
 
-    if ($is_search && !$is_category) {
+    if ($search_param) {
         $additional_where = '&& MATCH(l.title, l.description) AGAINST("'.$search_param.'")';
     }
-    if ($is_category && !$is_search) {
-        $additional_where = '&& l.category = '.$category_id;
+    if ($category_id) {
+        $additional_where = $additional_where.'&& l.category = '.$category_id;
     }
-    if ($is_search && $is_category) {
-        $additional_where = '&& MATCH(l.title, l.description) AGAINST("'.$search_param.'") && l.category = '.$category_id;
-    }
+
     if ($items_limit) {
         $set_limit = 'LIMIT '.$items_limit;
     }
     if ($items_offset) {
         $set_offset = 'OFFSET '.$items_offset;
     }
-
 
     $sql_lots = "SELECT l.id, l.title, starting_price, current_price, picture, datetime_finish, c.title as category, COUNT(b.id) as bets_quantity
             FROM lots l
@@ -578,3 +573,17 @@ function human_date($bet_date) {
     return $good_date;
 }
 
+function bets($link, $user_id) {
+    $sql = "SELECT l.id, l.picture, l.title, l.winner, u.contacts, c.title AS category, l.datetime_finish AS lot_finish, b.bet, b.datetime AS bet_date
+            FROM bets b
+            LEFT JOIN lots l ON b.lot = l.id
+            LEFT JOIN users u ON l.owner = u.id
+            LEFT JOIN categories c ON l.category = c.id
+            WHERE b.owner = $user_id";
+    if ($result = mysqli_query($link, $sql)) {
+        $bets = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    } else {
+        $bets = [];
+    }
+    return $bets;
+}
