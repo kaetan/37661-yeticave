@@ -1,0 +1,6 @@
+{
+    "name": "b41/37661-yeticave",
+    "require": {
+        "swiftmailer/swiftmailer": "^6.0"
+    }
+}

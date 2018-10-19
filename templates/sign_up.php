@@ -3,7 +3,7 @@
         <ul class="nav__list container">
             <?php foreach ($categories as $val): ?>
                 <li class="nav__item">
-                    <a href="all-lots.html"><?=$val['title']?></a>
+                    <a href="all_lots.php?cat=<?=$val['id']; ?>"><?=$val['title']?></a>
                 </li>
             <? endforeach ?>
         </ul>
@@ -17,7 +17,7 @@
         $email = $_POST['signup']['email'] ?? ''; ?>
         <div class="form__item <?=$classname;?>"> <!-- form__item--invalid -->
             <label for="email">E-mail*</label>
-            <input id="email" type="text" name="signup[email]" placeholder="Введите e-mail" value="<?=strip_tags($email);?>" required>
+            <input id="email" type="text" name="signup[email]" placeholder="Введите e-mail" value="<?=htmlspecialchars($email);?>" required>
             <span class="form__error"><?=$errors['email'];?></span>
         </div>
 
@@ -34,7 +34,7 @@
         $username = $_POST['signup']['username'] ?? ''; ?>
         <div class="form__item <?=$classname;?>">
             <label for="name">Имя*</label>
-            <input id="name" type="text" name="signup[username]" placeholder="Введите имя" value="<?=strip_tags($username);?>" required>
+            <input id="name" type="text" name="signup[username]" placeholder="Введите имя" value="<?=htmlspecialchars($username);?>" required>
             <span class="form__error">Введите имя</span>
         </div>
 
@@ -43,7 +43,7 @@
         $contacts = $_POST['signup']['contacts'] ?? ''; ?>
         <div class="form__item <?=$classname;?>">
             <label for="message">Контактные данные*</label>
-            <textarea id="message" name="signup[contacts]" placeholder="Напишите как с вами связаться" required><?=strip_tags($contacts);?></textarea>
+            <textarea id="message" name="signup[contacts]" placeholder="Напишите как с вами связаться" required><?=htmlspecialchars($contacts);?></textarea>
             <span class="form__error">Напишите как с вами связаться</span>
         </div>
 

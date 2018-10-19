@@ -22,7 +22,7 @@ $categories = categories($link);
 // Массив с ошибками валидации
 $errors = [];
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Данные из формы
     $form = $_POST;
     // Безвредный email
