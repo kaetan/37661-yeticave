@@ -7,6 +7,8 @@ date_default_timezone_set("UTC");
 require_once 'functions.php';
 require_once 'init.php';
 
+// Количество лотов на странице
+$ITEMS_LIMIT = 6;
 // Проверка аутентификации юзера
 $is_auth = is_auth();
 // Массив с аватарой и именем пользователя, если он залогинен
@@ -18,7 +20,7 @@ db_connection_error($link);
 $categories = categories($link);
 
 // Запрос лотов из БД
-$lots = lots($link, '', '', 6);
+$lots = lots($link, '', '', $ITEMS_LIMIT);
 
 // Собираем страницу и выводим ее на экран
 $content = include_template('main.php', ['lots' => $lots, 'categories' => $categories]);

@@ -380,7 +380,7 @@ function lots($link, $search_param = '', $category_id = '', $items_limit = NULL,
 function lot_info($link, $lot_id) {
     $sql_lot = "SELECT l.id, l.title, picture, c.title as category, 
                       description, datetime_finish, current_price, 
-                      current_price + bet_increment AS min_bet
+                      current_price + bet_increment AS min_bet, owner
             FROM lots l
             LEFT JOIN categories c ON c.id = category 
             WHERE l.id = $lot_id";
@@ -405,9 +405,9 @@ function lot_add($lot, $link) {
     $sql = "INSERT INTO lots
             (datetime_start, title, description, picture, starting_price, current_price,
             datetime_finish, bet_increment, category, owner)
-            VALUES (UTC_TIMESTAMP(), ?, ?, ?, ?, ?, ?, ?, ?, 1)";
+            VALUES (UTC_TIMESTAMP(), ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = db_get_prepare_stmt($link, $sql, [$lot['title'], $lot['description'], $lot['picture'],
-        $lot['starting_price'], $lot['current_price'], $lot['datetime_finish'], $lot['bet_increment'], $lot['category']]);
+        $lot['starting_price'], $lot['current_price'], $lot['datetime_finish'], $lot['bet_increment'], $lot['category'], $lot['owner']]);
     $result = mysqli_stmt_execute($stmt);
     return $result;
 }
@@ -574,6 +574,7 @@ function human_date($bet_date) {
 }
 
 function bets($link, $user_id) {
+    $bets = [];
     $sql = "SELECT l.id, l.picture, l.title, l.winner, u.contacts, c.title AS category, l.datetime_finish AS lot_finish, b.bet, b.datetime AS bet_date
             FROM bets b
             LEFT JOIN lots l ON b.lot = l.id
@@ -582,8 +583,6 @@ function bets($link, $user_id) {
             WHERE b.owner = $user_id";
     if ($result = mysqli_query($link, $sql)) {
         $bets = mysqli_fetch_all($result, MYSQLI_ASSOC);
-    } else {
-        $bets = [];
     }
     return $bets;
 }

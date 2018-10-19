@@ -9,6 +9,11 @@ require_once 'init.php';
 
 // Проверка аутентификации юзера
 $is_auth = is_auth();
+$user_id = '';
+if ($is_auth) {
+    $user_id = ($_SESSION['user']['id']);
+}
+
 // Массив с аватарой и именем пользователя, если он залогинен
 $user_header = user_header($is_auth);
 // Проверка подключения к БД и вывод ошибки, если она имеется
@@ -22,6 +27,7 @@ $categories = categories($link);
 $error_state = true;
 $bets = [];
 $bet_errors = '';
+$hide_bet_form = false;
 $page_title ='Лот:';
 // Если id задан, то выполнится функция запроса в БД
 // При несуществующем в базе id функция вернет пустой массив в переменную $lot_info
@@ -36,8 +42,15 @@ if(ISSET($_GET['id'])) {
 
         // Если есть информация по лоту, то запросим его ставки
         $bets = request_bets($link, $lot_id);
+
+        $time_left = strtotime($lot_info['datetime_finish']) - strtotime('now');
+
+        if ($lot_info['owner'] === $user_id or $time_left <= 0 or $user_id == $lot_info['owner']) {
+            $hide_bet_form = true;
+        }
     }
 }
+
 // Отправка формы добавления ставки
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_auth) {
     // Получаем id лота из формы добавления ставки
@@ -55,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_auth) {
         // Вызываем функцию добавления ставки в БД. При успешном добавлении переходим на страницу лота
         $result = bet_add($link, $cost, $user_id, $lot_id);
         if ($result) {
-
             header("Location: lot.php?id=" . $lot_id);
         }
         else {
@@ -76,7 +88,10 @@ else {
             'lot_info' => $lot_info,
             'bets' => $bets,
             'bet_errors' => $bet_errors,
-            'is_auth' => $is_auth]);
+            'hide_bet_form' => $hide_bet_form,
+            'time_left' => $time_left,
+            'is_auth' => $is_auth,
+            'user_id' => $user_id]);
 }
 
 // Собираем страницу и выводим ее на экран

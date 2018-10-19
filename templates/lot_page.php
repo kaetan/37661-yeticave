@@ -24,11 +24,11 @@
                 <p class="lot-item__description"><?=htmlspecialchars($lot_info['description'])?></p>
             </div>
             <div class="lot-item__right">
-                <?php if ($is_auth) { ?>
+
                 <div class="lot-item__state">
                     <!-- Время до завершения торгов -->
                     <div class="lot-item__timer timer">
-                        <?php print lot_timer($lot_info['datetime_finish'])?>
+                        <?= $time_left > 0 ? lot_timer($lot_info['datetime_finish']) : "Торги окончены"?>
                     </div>
                     <div class="lot-item__cost-state">
                         <!-- Текущая цена -->
@@ -44,22 +44,23 @@
                         </div>
                     </div>
                     <!-- Добавить ставку -->
-                    <form class="lot-item__form" action="lot.php?id=<?=$lot_info['id'];?>" method="post">
-                        <?php $classname = $bet_errors !== '' ? "form__item--invalid" : ""; ?>
-                        <p class="lot-item__form-item <?=$classname;?>">
-                            <input type="hidden" name = "lot_id" value="<?=$lot_info['id'];?>">
-                            <label for="cost">Ваша ставка</label>
-                            <input id="cost" type="number" name="cost" placeholder="<?=format_cost($lot_info['min_bet'], 0);?>">
-                        </p>
-                        <button type="submit" class="button">Сделать ставку</button>
-                    </form>
-                    <?php if (isset($bet_errors)) { ?>
-                        <div class = "form-item form__item--invalid">
-                            <span class="form__error"><?=$bet_errors; ?></span>
-                        </div>
+                    <?php if ($is_auth && $hide_bet_form === false) { ?>
+                        <form class="lot-item__form" action="lot.php?id=<?=$lot_info['id'];?>" method="post">
+                            <?php $classname = $bet_errors !== '' ? "form__item--invalid" : ""; ?>
+                            <p class="lot-item__form-item <?=$classname;?>">
+                                <input type="hidden" name = "lot_id" value="<?=$lot_info['id'];?>">
+                                <label for="cost">Ваша ставка</label>
+                                <input id="cost" type="number" name="cost" placeholder="<?=format_cost($lot_info['min_bet'], 0);?>">
+                            </p>
+                            <button type="submit" class="button">Сделать ставку</button>
+                        </form>
+                        <?php if (isset($bet_errors)) { ?>
+                            <div class = "form-item form__item--invalid">
+                                <span class="form__error"><?=$bet_errors; ?></span>
+                            </div>
+                        <?php } ?>
                     <?php } ?>
                 </div>
-                <?php } ?>
                 <div class="history">
                     <h3>История ставок (<span><?php print(count($bets));?></span>)</h3>
                     <table class="history__list">
