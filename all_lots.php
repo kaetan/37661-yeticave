@@ -16,6 +16,9 @@ db_connection_error($link);
 
 // Запрос категорий из БД
 $categories = categories($link);
+// Пустой массив для лотов
+$lots = [];
+$bad_page = false;
 // Список id категорий
 $cat_id_list = array_column($categories, 'id');
 // Пустое значение переданной категории
@@ -45,7 +48,31 @@ if(isset($_GET['cat'])) {
     }
 }
 
-require_once '_pagination.php';
+// Считаем, сколько всего лотов запрошено
+$total_items = count(lots($link, $is_search, $search_param, $is_category, $verified_category_id, '', ''));
+// Максимальное количество лотов на странице
+$page_items = 9;
+//Количество страниц. Convert to int
+$pages_count = ceil($total_items / $page_items);
+$pages_count = intval($pages_count);
+// Массив с номерами страниц
+$pages = range(1, $pages_count);
+
+// Текущая страница. Если не задана, то будет 1
+$current_page = !empty($_GET['page']) ? $_GET['page'] : '1';
+// Проверяем наличие номера текущей страницы
+if (!filter_var($current_page, FILTER_VALIDATE_INT, ["options" => ["min_range"=>1, "max_range"=>$pages_count]])) {
+    $bad_page = true;
+}
+else {
+    // Конвертируем значение текущей страницы в число
+    $current_page = intval($current_page);
+    // Смещение показа лотов для каждой страницы
+    $offset = ($current_page - 1) * $page_items;
+
+    // Запрашиваем лоты по указанной категории, указываем количество выводимых лотов и смещение
+    $lots = lots($link, $is_search, $search_param, $is_category, $verified_category_id, $page_items, $offset);
+}
 
 
 $pagination = include_template('_pagination.php',
@@ -56,6 +83,7 @@ $pagination = include_template('_pagination.php',
 
 $content = include_template('all_lots.php',
     ['lots' => $lots,
+        'bad_page' => $bad_page,
         'category_title' => $category_title,
         'categories' => $categories,
         'pagination' => $pagination]);

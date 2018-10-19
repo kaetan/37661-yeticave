@@ -10,12 +10,16 @@
     </nav>
     <div class="container">
         <section class="lots">
+            <?php if (!$bad_page) { ?>
             <h2>
                 Все лоты
                 <?php if ($category_title) { ?>
                 в категории <span>«<?=$category_title;?>»</span>
                 <?php ;} ?>
             </h2>
+            <?php } else { ?>
+                <h2>Нет лотов для отображения</h2>
+            <?php } ?>
             <ul class="lots__list">
                 <?php foreach ($lots as $lot): ?>
                     <li class="lots__item lot">
@@ -44,6 +48,6 @@
                 <? endforeach ?>
             </ul>
         </section>
-        <?=$pagination;?>
+        <?php if (!$bad_page) { print $pagination;}?>
     </div>
 </main>

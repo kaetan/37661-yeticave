@@ -19,23 +19,68 @@ $categories = categories($link);
 
 $lots = [];
 $not_found = true;
+$pages_count = NULL;
+$page_link = '';
+$current_page = '';
+$pages = [];
+$search_unsafe = '';
+$bad_page = false;
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['q'])) {
     // Данные из строки поиска записываем в переменную
-    $search_unsafe = trim($_GET['q']);
-    $search = mysqli_real_escape_string($link, $search_unsafe) ?? '';
+    $search_unsafe = trim($_GET['q']) ?? '';
+    $search = mysqli_real_escape_string($link, $search_unsafe) ;
 
     if ($search) {
-        $lots = lots($link, 1, $search, 0, '');
-        if ($lots) {
-            $not_found = false;
+        // Считаем, сколько всего лотов нашлось
+        $total_items = count(lots($link, 1, $search, 0, '', '', ''));
+
+        // Максимальное количество лотов на странице
+        $page_items = 9;
+        //Количество страниц. Convert to int
+        $pages_count = ceil($total_items / $page_items);
+        $pages_count = intval($pages_count);
+        // Массив с номерами страниц
+        $pages = range(1, $pages_count);
+
+
+        // Текущая страница. Если не задана, то будет 1
+        $current_page = !empty($_GET['page']) ? $_GET['page'] : '1';
+        // Проверяем наличие номера текущей страницы
+        if (!filter_var($current_page, FILTER_VALIDATE_INT, ["options" => ["min_range"=>1, "max_range"=>$pages_count]])) {
+            $bad_page = true;
+        }
+        else {
+            // Конвертируем значение текущей страницы в число
+            $current_page = intval($current_page);
+            // Оффсет для каждой страницы
+            $offset = ($current_page - 1) * $page_items;
+
+            // Запрашиваем лоты по указанной категории
+            $lots = lots($link, 1, $search, 0, '', $page_items, $offset);
+
+            // Устанавливаем текст ссылок для пагинатора
+            $page_link = 'search.php?q='.$search.'&';
+
+            if ($lots !== []) {
+                $not_found = false;
+            }
         }
     }
 }
 
 // Собираем страницу и выводим ее на экран
+$pagination = include_template('_pagination.php',
+    ['pages_count' => $pages_count,
+        'page_link' => $page_link,
+        'current_page' => $current_page,
+        'pages' => $pages]);
 $content = include_template('search.php',
     ['not_found' => $not_found,
+        'bad_page' => $bad_page,
+        'pagination' => $pagination,
         'search_unsafe' => $search_unsafe,
         'lots' => $lots,
         'categories' => $categories]);

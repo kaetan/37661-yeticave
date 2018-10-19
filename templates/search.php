@@ -12,8 +12,10 @@
         <section class="lots">
             <?php if (!$not_found) { ?>
                 <h2>Результаты поиска по запросу «<span><?=htmlspecialchars($search_unsafe); ?></span>»</h2>
+            <?php ;} elseif ($bad_page) { ?>
+                <h2>Нет лотов для отображения</h2>
             <?php ;} else { ?>
-                <h2>Ничего не найдено по вашему запросу</h2>
+            <h2>Ничего не найдено по вашему запросу</h2>
             <?php ;} ?>
             <ul class="lots__list">
                 <?php foreach ($lots as $lot): ?>
@@ -40,6 +42,6 @@
                 <? endforeach ?>
             </ul>
         </section>
-        <?=$pagination;?>
+        <?php if (!$bad_page) { print $pagination;}?>
     </div>
 </main>
