@@ -3,7 +3,7 @@
         <ul class="nav__list container">
             <?php foreach ($categories as $val): ?>
             <li class="nav__item">
-                <a href="all-lots.html"><?=$val['title']?></a>
+                <a href="all_lots.php?cat=<?=$val['id']; ?>"><?=$val['title']?></a>
             </li>
             <? endforeach ?>
         </ul>
@@ -17,7 +17,7 @@
         $email = $_POST['email'] ?? ''; ?>
         <div class="form__item <?=$classname;?>"> <!-- form__item--invalid -->
             <label for="email">E-mail*</label>
-            <input id="email" type="text" name="email" value = "<?=strip_tags($email);?>" placeholder="Введите e-mail" required>
+            <input id="email" type="text" name="email" value = "<?=htmlspecialchars($email);?>" placeholder="Введите e-mail" required>
             <span class="form__error"><?=$errors['email']; ?></span>
         </div>
 

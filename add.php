@@ -22,7 +22,7 @@ $cat_id_list = array_column($categories, 'id');
 $errors = [];
 
 // Валидация данных из формы
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Вся информация о лоте, полученная из формы
     $lot = $_POST['lot'];
     // Определяем необходимые поля
@@ -42,6 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // При отсутствии ошибок валидации - загрузка данных из формы в БД
     if (!count($errors)) {
+        // id пользователя из сессии
+        $lot['owner'] = $_SESSION['user']['id'];
+        // При создании лота текущая цена равна стартовой
         $lot['current_price'] = $lot['starting_price'];
 
         // Задаем имя изображения и перемещаем в папку img

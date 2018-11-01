@@ -9,6 +9,11 @@ require_once 'init.php';
 
 // Проверка аутентификации юзера
 $is_auth = is_auth();
+$user_id = '';
+if ($is_auth) {
+    $user_id = ($_SESSION['user']['id']);
+}
+
 // Массив с аватарой и именем пользователя, если он залогинен
 $user_header = user_header($is_auth);
 // Проверка подключения к БД и вывод ошибки, если она имеется
@@ -22,6 +27,7 @@ $categories = categories($link);
 $error_state = true;
 $bets = [];
 $bet_errors = '';
+$hide_bet_form = false;
 $page_title ='Лот:';
 // Если id задан, то выполнится функция запроса в БД
 // При несуществующем в базе id функция вернет пустой массив в переменную $lot_info
@@ -36,10 +42,18 @@ if(ISSET($_GET['id'])) {
 
         // Если есть информация по лоту, то запросим его ставки
         $bets = request_bets($link, $lot_id);
+        $bets_owners = array_column($bets, 'owner');
+
+        $time_left = strtotime($lot_info['datetime_finish']) - strtotime('now');
+
+        if ($lot_info['owner'] === $user_id or $time_left <= 0 or in_array($user_id, $bets_owners)) {
+            $hide_bet_form = true;
+        }
     }
 }
+
 // Отправка формы добавления ставки
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $is_auth) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_auth) {
     // Получаем id лота из формы добавления ставки
     $lot_id = $_POST['lot_id'];
     // Получаем сумму ставки
@@ -51,11 +65,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $is_auth) {
     $bet_errors = validate_bet($link, $cost, $lot_id);
 
     // Если ошибок нет, то добавляем ставку в БД и обновляем страницу
-    if ($bet_errors == '') {
+    if ($bet_errors === '') {
         // Вызываем функцию добавления ставки в БД. При успешном добавлении переходим на страницу лота
         $result = bet_add($link, $cost, $user_id, $lot_id);
         if ($result) {
-
             header("Location: lot.php?id=" . $lot_id);
         }
         else {
@@ -76,7 +89,10 @@ else {
             'lot_info' => $lot_info,
             'bets' => $bets,
             'bet_errors' => $bet_errors,
-            'is_auth' => $is_auth]);
+            'hide_bet_form' => $hide_bet_form,
+            'time_left' => $time_left,
+            'is_auth' => $is_auth,
+            'user_id' => $user_id]);
 }
 
 // Собираем страницу и выводим ее на экран
